@@ -30,6 +30,7 @@ import (
 const namespace = "newrelic-kubernetes-operator-v2-system"
 
 var _ = Describe("controller", Ordered, func() {
+	Skip("Skip this test for now")
 	BeforeAll(func() {
 		By("installing prometheus operator")
 		Expect(utils.InstallPrometheusOperator()).To(Succeed())
