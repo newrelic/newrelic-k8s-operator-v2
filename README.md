@@ -109,9 +109,9 @@ Once the operator is successfully deployed to a cluster, resources can be provis
 
 ## Alert Policy Example
 
-Using the [policy example](config/examples/policies/example_policy.yml) provided. Input the fields within the configuration, including a [user API key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key), accountId to create the resource within, and policy specific inputs.
+Using the [policy example](examples/policies/example_policy.yml) provided. Input the fields within the configuration, including a [user API key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key), accountId to create the resource within, and policy specific inputs.
 
-> <small>**Note:** You can also use a [Kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) for providing your API key. We've provided an [example secret](/examples/example_secret.yaml) configuration file in case you want to use this method. You'll need to replace `api_key` with [`api_key_secret`](config/examples/example_policy.yml#11). </small>
+> <small>**Note:** You can also use a [Kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) for providing your API key. We've provided an [example secret](/examples/example_secret.yaml) configuration file in case you want to use this method. You'll need to replace `api_key` with [`api_key_secret`](examples/example_policy.yml#11). </small>
 
 
 ```yaml
