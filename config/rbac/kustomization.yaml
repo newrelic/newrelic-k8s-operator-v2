@@ -32,4 +32,3 @@ resources:
 - nrqlcondition_viewer_role.yaml
 - alertpolicy_editor_role.yaml
 - alertpolicy_viewer_role.yaml
-

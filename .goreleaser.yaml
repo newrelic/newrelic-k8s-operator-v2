@@ -14,7 +14,7 @@ before:
     - go mod tidy
 
 builds:
-  - id: main
+  - id: newrelic
     main: ./cmd/main.go
     binary: manager
     flags:
@@ -23,16 +23,15 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - windows
-      - darwin
     goarch:
       - amd64
     ldflags:
       - -s -w -X main.version={{.Version}}
 
 archives:
-  - builds:
-      - main
+  - id: newrelic
+    builds:
+      - newrelic
   - format: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
@@ -43,9 +42,24 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     # use zip for windows archives
-    format_overrides:
-      - goos: windows
-        format: zip
+    # format_overrides:
+    #   - goos: windows
+    #     format: zip
+    files:
+      - README.md
+      - LICENSE
+
+# dockers:
+#   - id: newrelic
+#     ids:
+#       - newrelic
+#     dockerfile: Dockerfile
+#     image_templates:
+#       - 'newrelic/newrelic-k8s-operator-v2:{{ .Tag }}'
+#       - 'newrelic/newrelic-k8s-operator-v2:latest'
+
+release:
+  name_template: "{{ .ProjectName }} v{{ .Version }}"
 
 changelog:
   sort: asc
