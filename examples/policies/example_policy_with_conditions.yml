@@ -1,0 +1,71 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertPolicy
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertpolicy-example
+spec:
+  apiKey: <api_key>
+  # apiKeySecret:
+  #   name: nr-api-key
+  #   namespace: default
+  #   keyName: api-key
+  accountId: 1
+  region: "US"
+  name: TestPolicy-K8s
+  incidentPreference: "PER_CONDITION"
+  conditions:
+    - spec:
+        name: "Example Nrql Baseline Condition"
+        description: "test description"
+        type: BASELINE
+        nrql:
+          query: "SELECT count(*) FROM Transaction"
+        enabled: true
+        runbookUrl: "https://www.google.com"
+        terms:
+          - threshold: "95"
+            thresholdOccurrences: ALL
+            thresholdDuration: 120
+            priority: CRITICAL
+            operator: ABOVE
+          - threshold: "75"
+            thresholdOccurrences: ALL
+            thresholdDuration: 120
+            priority: WARNING
+            operator: ABOVE
+        expiration:
+          expirationDuration: 360
+          closeViolationsOnExpiration: true
+          openViolationOnExpiration: false
+        signal:
+          aggregationWindow: 60
+          evaluationDelay: 5
+          aggregationMethod: EVENT_FLOW
+          aggregationDelay: 60
+        baselineDirection: "UPPER_ONLY"
+    - spec:
+        name: "Example NRQL Static Condition"
+        description: "test description"
+        type: STATIC
+        nrql:
+          query: "SELECT count(*) FROM SyntheticCheck"
+        enabled: true
+        runbookUrl: "https://www.google.com"
+        terms:
+          - threshold: "65"
+            thresholdOccurrences: ALL
+            thresholdDuration: 60
+            priority: CRITICAL
+            operator: BELOW
+        expiration:
+          expirationDuration: 360
+          closeViolationsOnExpiration: true
+          openViolationOnExpiration: false
+        signal:
+          aggregationWindow: 60
+          evaluationDelay: 5
+          fillOption: NONE
+          aggregationMethod: EVENT_FLOW
+          aggregationDelay: 60

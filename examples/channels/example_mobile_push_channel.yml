@@ -1,0 +1,18 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertChannel
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertchannel-mobilepush-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  region: "US"
+  name: "test-mobilepush-channel"
+  destinationId: "<destination_id>"
+  properties:
+    - key: ""
+      value: ""
+  product: "IINT"
+  type: "MOBILE_PUSH"

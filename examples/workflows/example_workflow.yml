@@ -1,0 +1,46 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertWorkflow
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertworkflow-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  region: "US"
+  name: "test-workflow"
+  enabled: true
+  issuesFilter:
+    name: test-filter
+    type: "FILTER"
+    predicates:
+      - attribute: accumulations.policyName
+        operator: "EXACTLY_MATCHES"
+        values:
+          - "my-policy"
+  mutingRulesHandling: "DONT_NOTIFY_FULLY_MUTED_ISSUES"
+  channels: #required
+    - notificationTriggers:
+        - "ACTIVATED"
+        - "CLOSED"
+      spec:
+        name: "test-email-channel"
+        destinationId: "<destination_id>" #required
+        product: "IINT"
+        properties:
+          - key: "subject"
+            value: "Example Email Subject"
+          - key: "customDetailsEmail"
+            value: "issue ids - {{issueId}}"
+        type: "EMAIL"
+    - notificationTriggers:
+        - "ACTIVATED"
+      spec:
+        name: "test-mobilepush-channel"
+        destinationId: "<destination_id>" #required
+        product: "IINT"
+        properties:
+          - key: ""
+            value: ""
+        type: "MOBILE_PUSH"

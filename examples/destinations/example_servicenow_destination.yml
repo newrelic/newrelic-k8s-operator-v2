@@ -1,0 +1,22 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertDestination
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertdestination-snow-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  region: "US"
+  name: "test-snow-destination"
+  properties:
+    - key: "url"
+      value: "https://dev123.service-now.com"
+  auth:
+    type: "BASIC"
+    basic:
+      user: "newrelic_service_account"
+      password: "testing123"
+  type: "SERVICE_NOW_APP"
+  active: true

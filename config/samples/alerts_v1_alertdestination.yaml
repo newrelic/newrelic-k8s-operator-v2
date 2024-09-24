@@ -1,0 +1,9 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertDestination
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertdestination-sample
+spec:
+  # TODO(user): Add fields here

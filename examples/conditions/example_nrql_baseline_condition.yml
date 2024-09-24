@@ -1,0 +1,40 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: NrqlCondition
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: nrqlcondition-baseline-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  # api_key_secret:
+  #   name: nr-api-key
+  #   namespace: default
+  #   key_name: api-key
+  region: "US"
+  name: "Example Nrql Baseline Condition"
+  description: "test description"
+  # Must reference an existing New Relic alert policy from your account
+  existingPolicyId: "123456"
+  type: BASELINE
+  nrql:
+    query: "SELECT count(*) FROM Transaction"
+  enabled: true
+  runbookUrl: "https://www.google.com"
+  terms:
+    - threshold: "85"
+      thresholdOccurrences: ALL
+      thresholdDuration: 120
+      priority: CRITICAL
+      operator: ABOVE
+  expiration:
+    expirationDuration: 360
+    closeViolationsOnExpiration: true
+    openViolationOnExpiration: false
+  signal:
+    aggregationWindow: 60
+    evaluationDelay: 5
+    aggregationMethod: EVENT_FLOW
+    aggregationDelay: 60
+  baselineDirection: "UPPER_ONLY" # UPPER_ONLY | LOWER_ONLY | UPPER_AND_LOWER

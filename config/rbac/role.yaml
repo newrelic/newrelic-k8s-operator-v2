@@ -1,0 +1,44 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels
+  - alertdestinations
+  - alertpolicies
+  - alertworkflows
+  - nrqlconditions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/finalizers
+  - alertdestinations/finalizers
+  - alertpolicies/finalizers
+  - alertworkflows/finalizers
+  - nrqlconditions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/status
+  - alertdestinations/status
+  - alertpolicies/status
+  - alertworkflows/status
+  - nrqlconditions/status
+  verbs:
+  - get
+  - patch
+  - update

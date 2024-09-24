@@ -1,0 +1,23 @@
+# permissions for end users to view alertpolicies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertpolicy-viewer-role
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertpolicies/status
+  verbs:
+  - get

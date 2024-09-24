@@ -1,0 +1,26 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertChannel
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertchannel-jira-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  region: "US"
+  name: "test-jira-channel"
+  destinationId: "" #<destination_id>
+  product: "IINT"
+  properties:
+    - key: "project"
+      label: "project-name"
+      value: "10000" # id of the project, can be found using https://confluence.atlassian.com/jirakb/how-to-get-project-id-from-the-jira-user-interface-827341414.html
+    - key: "issuetype"
+      label: "Bug"
+      value: "10004" # id of the issuetype, can be found using https://confluence.atlassian.com/jirakb/finding-the-id-for-issue-types-646186508.html
+    - key: "description"
+      value: "issue id - {{issueId}}"
+    - key: "summary"
+      value: "{{ annotations.title.[0] }}"
+  type: "JIRA_CLASSIC"

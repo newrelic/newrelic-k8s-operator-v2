@@ -1,0 +1,8 @@
+## Append samples of your project ##
+resources:
+- alerts_v1_alertpolicy.yaml
+- alerts_v1_nrqlcondition.yaml
+- alerts_v1_alertdestination.yaml
+- alerts_v1_alertchannel.yaml
+- alerts_v1_alertworkflow.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

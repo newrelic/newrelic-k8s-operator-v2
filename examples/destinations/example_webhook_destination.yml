@@ -1,0 +1,38 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertDestination
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertdestination-webhook-example
+spec:
+  accountId: 1821385
+  apiKey: <api_key>
+  region: "US"
+  name: "test-webhook-destination"
+  properties:
+    - key: "url"
+      value: "https://endpoint.com"
+  #various auth configs - only one can be configured at a time
+  auth:
+    type: "BASIC"
+    basic:
+      user: "test"
+      password: "testing123"
+
+  # auth:
+  #   type: "TOKEN"
+  #   token:
+  #     prefix: "Bearer"
+  #     token: "myToken"
+
+  # auth:
+  #   type: "CUSTOM_HEADERS"
+  #   customHeaders:
+  #     customHeaders:
+  #       - key: "content-type"
+  #         value: "application/json"
+  #       - key: "api-key"
+  #         value: "myApiKey"
+  type: "WEBHOOK"
+  active: true
