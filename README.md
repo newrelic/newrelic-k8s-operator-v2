@@ -105,13 +105,13 @@ kustomize build github.com/newrelic/newrelic-k8s-operator-v2/config/default | ku
 
 # Provisioning Resources
 
-Once the operator is successfully deployed to a cluster, resources can be provisioned with NR k8s objects. There are detailed examples provided under the [examples](config/examples) section.
+Once the operator is successfully deployed to a cluster, resources can be provisioned with NR k8s objects. There are detailed examples provided under the [examples](examples/) section.
 
 ## Alert Policy Example
 
 Using the [policy example](examples/policies/example_policy.yml) provided. Input the fields within the configuration, including a [user API key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key), accountId to create the resource within, and policy specific inputs.
 
-> <small>**Note:** You can also use a [Kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) for providing your API key. We've provided an [example secret](/examples/example_secret.yaml) configuration file in case you want to use this method. You'll need to replace `api_key` with [`api_key_secret`](examples/example_policy.yml#11). </small>
+> <small>**Note:** You can also use a [Kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) for providing your API key. We've provided an [example secret](/examples/example_secret.yml) configuration file in case you want to use this method. You'll need to replace `api_key` with [`api_key_secret`](examples/policies/example_policy.yml#L11). </small>
 
 
 ```yaml
