@@ -1,5 +1,5 @@
 resources:
   - ../default
 images:
-  - name: newrelic/newrelic-k8s-operator-v2 #this must match local image name (after building)
+  - name: newrelic/newrelic-k8s-operator-v2 #this must match local image name/tag (after building)
     newTag: dev

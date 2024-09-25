@@ -46,7 +46,6 @@ type AlertPolicyReconciler struct {
 	Alerts      interfaces.NewRelicClientInterface
 	AlertClient func(string, string) (interfaces.NewRelicClientInterface, error)
 	apiKey      string
-	ctx         context.Context
 }
 
 // +kubebuilder:rbac:groups=alerts.k8s.newrelic.com,resources=alertpolicies,verbs=get;list;watch;create;update;patch;delete

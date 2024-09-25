@@ -53,10 +53,16 @@ archives:
 #   - id: newrelic
 #     ids:
 #       - newrelic
-#     dockerfile: Dockerfile
+#     dockerfile: .goreleaser.dockerfile
+#     # skip_push: true
+#     build_flag_templates:
+#       - "--platform=linux/amd64"
 #     image_templates:
 #       - 'newrelic/newrelic-k8s-operator-v2:{{ .Tag }}'
 #       - 'newrelic/newrelic-k8s-operator-v2:latest'
+
+checksum:
+  name_template: 'checksums.txt'
 
 release:
   name_template: "{{ .ProjectName }} v{{ .Version }}"
