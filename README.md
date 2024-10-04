@@ -18,6 +18,8 @@ Kubernetes operator that facilitates management of New Relic resources from with
 
 If you are looking for New Relic's Kubernetes operator for managing New Relic's Kubernetes integration, please see [newrelic-k8s-operator](https://github.com/newrelic/newrelic-k8s-operator).
 
+Docker Images are available in [DockerHub](https://hub.docker.com/r/newrelic/newrelic-k8s-operator-v2/tags)
+
 # Quick Start
 
 ## Running Locally w/ Kind
@@ -32,34 +34,18 @@ brew install kubernetes-cli kustomize kind
 2. Create a test cluster with `kind`
 
 ```bash
-kind create cluster --name newrelic
+kind create cluster --name newrelic-test
 kubectl cluster-info
 ```
 
-3. Clone the repo, build the docker image locally (using dev tag as an example)
+3. Install the operator in the test cluster
 
 ```bash
-git clone git@github.com:newrelic/newrelic-k8s-operator-v2.git
-cd newrelic-k8s-operator-v2
-docker build -t newrelic/newrelic-k8s-operator-v2:dev .
-```
-
-4. Load the image into the kind cluster
-
-```bash
- kind load docker-image newrelic/newrelic-k8s-operator-v2:dev --name newrelic-test
-```
-> <small>**Note:** Kind's default image pull policy for `:latest` tags is `Always`, so it's recommended to use a tag other than `latest`. For more information see [Kind's docs](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster)</small>
-
-
-5. Install the operator with provided dev `kustomization.yaml` and confirm installation
-
-```bash
-kustomize build config/dev | kubectl apply -f -
+kustomize build github.com/newrelic/newrelic-k8s-operator-v2/config/default | kubectl apply -f -
 ```
 > <small>**Note:** This will install operator on whatever kubernetes cluster kubectl is configured to use.</small>
 
-6. Validate pods are running
+4. Validate pods are running
 
 ```bash
 kubectl get pods -n newrelic-k8s-operator-v2-system
@@ -90,13 +76,6 @@ kustomize build . | kubectl apply -f -
 ## Uninstall
 
 The operator can be removed with the reverse of installation:
-
-```bash
-kustomize build config/dev | kubectl delete -f -
-```
-
-
-..or if installed without cloning repo:
 
 ```bash
 kustomize build github.com/newrelic/newrelic-k8s-operator-v2/config/default | kubectl delete -f -

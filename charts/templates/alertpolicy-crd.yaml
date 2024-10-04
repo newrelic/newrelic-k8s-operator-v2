@@ -1,0 +1,392 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: alertpolicies.alerts.k8s.newrelic.com
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: AlertPolicy
+    listKind: AlertPolicyList
+    plural: alertpolicies
+    singular: alertpolicy
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AlertPolicy is the Schema for the alertpolicies API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlertPolicySpec defines the desired state of AlertPolicy
+            properties:
+              accountId:
+                type: integer
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              conditions:
+                items:
+                  description: PolicyCondition defines the conditions contained within
+                    an AlertPolicy
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    spec:
+                      description: PolicyConditionSpec defines the desired state of
+                        PolicyCondition
+                      properties:
+                        accountId:
+                          type: integer
+                        apiKey:
+                          type: string
+                        apiKeySecret:
+                          description: NewRelicSecret masks sensitive data input into
+                            configs
+                          properties:
+                            keyName:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                        baselineDirection:
+                          description: NrqlBaselineDirection
+                          type: string
+                        description:
+                          type: string
+                        enabled:
+                          type: boolean
+                        existingPolicyId:
+                          type: string
+                        expiration:
+                          description: AlertsNrqlConditionExpiration - Settings for
+                            how violations are opened or closed when a signal expires.
+                          properties:
+                            closeViolationsOnExpiration:
+                              type: boolean
+                            expirationDuration:
+                              type: integer
+                            ignoreOnExpectedTermination:
+                              type: boolean
+                            openViolationOnExpiration:
+                              type: boolean
+                          type: object
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        nrql:
+                          description: NrqlConditionCreateQuery defines a nrql configuration
+                          properties:
+                            dataAccountId:
+                              type: integer
+                            evaluationOffset:
+                              type: integer
+                            query:
+                              type: string
+                          type: object
+                        region:
+                          type: string
+                        runbookUrl:
+                          type: string
+                        signal:
+                          description: AlertsNrqlConditionSignal - Configuration that
+                            defines the signal that the NRQL condition will use to evaluate.
+                          properties:
+                            aggregationDelay:
+                              type: integer
+                            aggregationMethod:
+                              description: NrqlConditionAggregationMethod - The available
+                                aggregation methods.
+                              type: string
+                            aggregationTimer:
+                              type: integer
+                            aggregationWindow:
+                              type: integer
+                            evaluationDelay:
+                              type: integer
+                            evaluationOffset:
+                              type: integer
+                            fillOption:
+                              description: |-
+                                AlertsFillOption - The available fill options.
+                                nolint:revive
+                              type: string
+                            fillValue:
+                              type: number
+                            slideBy:
+                              type: integer
+                          type: object
+                        terms:
+                          items:
+                            description: AlertsNrqlConditionTerm represents the terms
+                              of a New Relic alert condition.
+                            properties:
+                              operator:
+                                description: AlertsNRQLConditionTermsOperator - Operator
+                                  used to compare against the threshold for NrqlConditions.
+                                type: string
+                              priority:
+                                description: NrqlConditionPriority specifies the priority
+                                  for alert condition terms.
+                                type: string
+                              threshold:
+                                type: string
+                              thresholdDuration:
+                                type: integer
+                              thresholdOccurrences:
+                                description: ThresholdOccurrence specifies the threshold
+                                  occurrence for NRQL alert condition terms.
+                                type: string
+                            type: object
+                          type: array
+                        titleTemplate:
+                          type: string
+                        type:
+                          description: NrqlConditionType specifies the type of NRQL
+                            alert condition.
+                          type: string
+                        violationTimeLimit:
+                          description: NrqlConditionViolationTimeLimit specifies the
+                            value function of NRQL alert condition.
+                          type: string
+                        violationTimeLimitSeconds:
+                          type: integer
+                      type: object
+                  type: object
+                type: array
+              incidentPreference:
+                enum:
+                - PER_POLICY
+                - PER_CONDITION
+                - PER_CONDITION_AND_TARGET
+                type: string
+              name:
+                type: string
+              region:
+                type: string
+            required:
+            - name
+            - region
+            type: object
+          status:
+            description: AlertPolicyStatus defines the observed state of AlertPolicy
+            properties:
+              appliedSpec:
+                description: AlertPolicySpec defines the desired state of AlertPolicy
+                properties:
+                  accountId:
+                    type: integer
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  conditions:
+                    items:
+                      description: PolicyCondition defines the conditions contained
+                        within an AlertPolicy
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        spec:
+                          description: PolicyConditionSpec defines the desired state
+                            of PolicyCondition
+                          properties:
+                            accountId:
+                              type: integer
+                            apiKey:
+                              type: string
+                            apiKeySecret:
+                              description: NewRelicSecret masks sensitive data input
+                                into configs
+                              properties:
+                                keyName:
+                                  type: string
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
+                            baselineDirection:
+                              description: NrqlBaselineDirection
+                              type: string
+                            description:
+                              type: string
+                            enabled:
+                              type: boolean
+                            existingPolicyId:
+                              type: string
+                            expiration:
+                              description: AlertsNrqlConditionExpiration - Settings
+                                for how violations are opened or closed when a signal
+                                expires.
+                              properties:
+                                closeViolationsOnExpiration:
+                                  type: boolean
+                                expirationDuration:
+                                  type: integer
+                                ignoreOnExpectedTermination:
+                                  type: boolean
+                                openViolationOnExpiration:
+                                  type: boolean
+                              type: object
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            nrql:
+                              description: NrqlConditionCreateQuery defines a nrql configuration
+                              properties:
+                                dataAccountId:
+                                  type: integer
+                                evaluationOffset:
+                                  type: integer
+                                query:
+                                  type: string
+                              type: object
+                            region:
+                              type: string
+                            runbookUrl:
+                              type: string
+                            signal:
+                              description: AlertsNrqlConditionSignal - Configuration
+                                that defines the signal that the NRQL condition will
+                                use to evaluate.
+                              properties:
+                                aggregationDelay:
+                                  type: integer
+                                aggregationMethod:
+                                  description: NrqlConditionAggregationMethod - The
+                                    available aggregation methods.
+                                  type: string
+                                aggregationTimer:
+                                  type: integer
+                                aggregationWindow:
+                                  type: integer
+                                evaluationDelay:
+                                  type: integer
+                                evaluationOffset:
+                                  type: integer
+                                fillOption:
+                                  description: |-
+                                    AlertsFillOption - The available fill options.
+                                    nolint:revive
+                                  type: string
+                                fillValue:
+                                  type: number
+                                slideBy:
+                                  type: integer
+                              type: object
+                            terms:
+                              items:
+                                description: AlertsNrqlConditionTerm represents the
+                                  terms of a New Relic alert condition.
+                                properties:
+                                  operator:
+                                    description: AlertsNRQLConditionTermsOperator -
+                                      Operator used to compare against the threshold
+                                      for NrqlConditions.
+                                    type: string
+                                  priority:
+                                    description: NrqlConditionPriority specifies the
+                                      priority for alert condition terms.
+                                    type: string
+                                  threshold:
+                                    type: string
+                                  thresholdDuration:
+                                    type: integer
+                                  thresholdOccurrences:
+                                    description: ThresholdOccurrence specifies the threshold
+                                      occurrence for NRQL alert condition terms.
+                                    type: string
+                                type: object
+                              type: array
+                            titleTemplate:
+                              type: string
+                            type:
+                              description: NrqlConditionType specifies the type of NRQL
+                                alert condition.
+                              type: string
+                            violationTimeLimit:
+                              description: NrqlConditionViolationTimeLimit specifies
+                                the value function of NRQL alert condition.
+                              type: string
+                            violationTimeLimitSeconds:
+                              type: integer
+                          type: object
+                      type: object
+                    type: array
+                  incidentPreference:
+                    enum:
+                    - PER_POLICY
+                    - PER_CONDITION
+                    - PER_CONDITION_AND_TARGET
+                    type: string
+                  name:
+                    type: string
+                  region:
+                    type: string
+                required:
+                - name
+                - region
+                type: object
+              policyId:
+                type: integer
+            required:
+            - appliedSpec
+            - policyId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
