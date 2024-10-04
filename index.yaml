@@ -1,14 +1,14 @@
 apiVersion: v1
 entries:
-  chart:
+  nr-operator-v2:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2024-10-04T14:28:25.382411-04:00"
+    created: "2024-10-04T14:55:15.418495-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
-    digest: 6e8a70a03503d8df32b0361287536ce9cc5f9320d3d73e03d977c8d4bc06b928
-    name: chart
+    digest: 7741936c68602335fafa02367e5511d7276c02d9b072fd2dbdac065ef7d1bf12
+    name: nr-operator-v2
     type: application
     urls:
-    - https://github.com/newrelic/newrelic-k8s-operator-v2/chart-0.1.0.tgz
+    - https://github.com/newrelic/newrelic-k8s-operator-v2/nr-operator-v2-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-04T14:28:25.381443-04:00"
+generated: "2024-10-04T14:55:15.417535-04:00"
