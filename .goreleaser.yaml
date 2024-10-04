@@ -49,17 +49,17 @@ archives:
       - README.md
       - LICENSE
 
-# dockers:
-#   - id: newrelic
-#     ids:
-#       - newrelic
-#     dockerfile: .goreleaser.dockerfile
-#     # skip_push: true
-#     build_flag_templates:
-#       - "--platform=linux/amd64"
-#     image_templates:
-#       - 'newrelic/newrelic-k8s-operator-v2:{{ .Tag }}'
-#       - 'newrelic/newrelic-k8s-operator-v2:latest'
+dockers:
+  - id: newrelic
+    ids:
+      - newrelic
+    dockerfile: .goreleaser.dockerfile
+    # skip_push: true
+    build_flag_templates:
+      - "--platform=linux/amd64"
+    image_templates:
+      - 'newrelic/newrelic-k8s-operator-v2:{{ .Tag }}'
+      - 'newrelic/newrelic-k8s-operator-v2:latest'
 
 checksum:
   name_template: 'checksums.txt'
