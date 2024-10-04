@@ -1,0 +1,384 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: alertdestinations.alerts.k8s.newrelic.com
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: AlertDestination
+    listKind: AlertDestinationList
+    plural: alertdestinations
+    singular: alertdestination
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AlertDestination is the Schema for the alertdestinations API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlertDestinationSpec defines the desired state of AlertDestination
+            properties:
+              accountId:
+                type: integer
+              active:
+                type: boolean
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              auth:
+                description: AiNotificationsCredentialsInput - Credential input object
+                properties:
+                  basic:
+                    description: AiNotificationsBasicAuthInput - Basic auth input object
+                    properties:
+                      password:
+                        description: password
+                        type: string
+                      user:
+                        description: user
+                        type: string
+                    required:
+                    - password
+                    - user
+                    type: object
+                  customHeaders:
+                    description: AiNotificationsCustomHeadersAuthInput - Custom headers
+                      auth input object
+                    properties:
+                      customHeaders:
+                        items:
+                          description: AiNotificationsCustomHeaderInput - Custom header
+                            input object
+                          properties:
+                            key:
+                              description: key
+                              type: string
+                            value:
+                              description: value
+                              type: string
+                          required:
+                          - key
+                          type: object
+                        type: array
+                    type: object
+                  oauth2:
+                    description: AiNotificationsOAuth2AuthInput - OAuth2 auth input
+                      object
+                    properties:
+                      accessTokenUrl:
+                        description: accessTokenUrl
+                        type: string
+                      authorizationUrl:
+                        description: authorizationUrl
+                        type: string
+                      clientId:
+                        description: clientId
+                        type: string
+                      clientSecret:
+                        description: clientSecret
+                        type: string
+                      prefix:
+                        description: prefix
+                        type: string
+                      refreshInterval:
+                        description: refreshInterval
+                        type: integer
+                      refreshToken:
+                        description: refreshToken
+                        type: string
+                      refreshable:
+                        description: refreshable
+                        type: boolean
+                      scope:
+                        description: scope
+                        type: string
+                      token:
+                        description: token
+                        type: string
+                    required:
+                    - accessTokenUrl
+                    - authorizationUrl
+                    - clientId
+                    - clientSecret
+                    - refreshable
+                    - token
+                    type: object
+                  token:
+                    description: AiNotificationsTokenAuthInput - Token auth input object
+                    properties:
+                      prefix:
+                        description: prefix
+                        type: string
+                      token:
+                        description: token
+                        type: string
+                    required:
+                    - token
+                    type: object
+                  type:
+                    description: AiNotificationsAuthType - Authentication types
+                    type: string
+                required:
+                - type
+                type: object
+              id:
+                type: string
+              name:
+                type: string
+              properties:
+                items:
+                  description: AiNotificationsPropertyInput defines the inputs for a
+                    given destination type
+                  properties:
+                    displayValue:
+                      type: string
+                    key:
+                      type: string
+                    label:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - key
+                  - value
+                  type: object
+                type: array
+              region:
+                type: string
+              secureUrl:
+                description: AiNotificationsSecureURLInput - Destination SecureUrlInput
+                  object
+                properties:
+                  prefix:
+                    description: prefix
+                    type: string
+                  secureSuffix:
+                    description: secureSuffix
+                    type: string
+                required:
+                - prefix
+                - secureSuffix
+                type: object
+              type:
+                description: AiNotificationsDestinationType - Destination types
+                type: string
+            required:
+            - name
+            - properties
+            - type
+            type: object
+          status:
+            description: AlertDestinationStatus defines the observed state of AlertDestination
+            properties:
+              appliedSpec:
+                description: AlertDestinationSpec defines the desired state of AlertDestination
+                properties:
+                  accountId:
+                    type: integer
+                  active:
+                    type: boolean
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  auth:
+                    description: AiNotificationsCredentialsInput - Credential input
+                      object
+                    properties:
+                      basic:
+                        description: AiNotificationsBasicAuthInput - Basic auth input
+                          object
+                        properties:
+                          password:
+                            description: password
+                            type: string
+                          user:
+                            description: user
+                            type: string
+                        required:
+                        - password
+                        - user
+                        type: object
+                      customHeaders:
+                        description: AiNotificationsCustomHeadersAuthInput - Custom
+                          headers auth input object
+                        properties:
+                          customHeaders:
+                            items:
+                              description: AiNotificationsCustomHeaderInput - Custom
+                                header input object
+                              properties:
+                                key:
+                                  description: key
+                                  type: string
+                                value:
+                                  description: value
+                                  type: string
+                              required:
+                              - key
+                              type: object
+                            type: array
+                        type: object
+                      oauth2:
+                        description: AiNotificationsOAuth2AuthInput - OAuth2 auth input
+                          object
+                        properties:
+                          accessTokenUrl:
+                            description: accessTokenUrl
+                            type: string
+                          authorizationUrl:
+                            description: authorizationUrl
+                            type: string
+                          clientId:
+                            description: clientId
+                            type: string
+                          clientSecret:
+                            description: clientSecret
+                            type: string
+                          prefix:
+                            description: prefix
+                            type: string
+                          refreshInterval:
+                            description: refreshInterval
+                            type: integer
+                          refreshToken:
+                            description: refreshToken
+                            type: string
+                          refreshable:
+                            description: refreshable
+                            type: boolean
+                          scope:
+                            description: scope
+                            type: string
+                          token:
+                            description: token
+                            type: string
+                        required:
+                        - accessTokenUrl
+                        - authorizationUrl
+                        - clientId
+                        - clientSecret
+                        - refreshable
+                        - token
+                        type: object
+                      token:
+                        description: AiNotificationsTokenAuthInput - Token auth input
+                          object
+                        properties:
+                          prefix:
+                            description: prefix
+                            type: string
+                          token:
+                            description: token
+                            type: string
+                        required:
+                        - token
+                        type: object
+                      type:
+                        description: AiNotificationsAuthType - Authentication types
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  properties:
+                    items:
+                      description: AiNotificationsPropertyInput defines the inputs for
+                        a given destination type
+                      properties:
+                        displayValue:
+                          type: string
+                        key:
+                          type: string
+                        label:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                  region:
+                    type: string
+                  secureUrl:
+                    description: AiNotificationsSecureURLInput - Destination SecureUrlInput
+                      object
+                    properties:
+                      prefix:
+                        description: prefix
+                        type: string
+                      secureSuffix:
+                        description: secureSuffix
+                        type: string
+                    required:
+                    - prefix
+                    - secureSuffix
+                    type: object
+                  type:
+                    description: AiNotificationsDestinationType - Destination types
+                    type: string
+                required:
+                - name
+                - properties
+                - type
+                type: object
+              destinationId:
+                type: string
+            required:
+            - appliedSpec
+            - destinationId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

@@ -150,6 +150,10 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
+## Location of helmify
+HELMIFYBIN ?= /usr/local/bin
+HELMIFY ?= $(HELMIFYBIN)/helmify
+
 ## Tool Binaries
 KUBECTL ?= kubectl
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
@@ -162,6 +166,14 @@ KUSTOMIZE_VERSION ?= v5.4.3
 CONTROLLER_TOOLS_VERSION ?= v0.16.1
 ENVTEST_VERSION ?= release-0.19
 GOLANGCI_LINT_VERSION ?= v1.59.1
+
+.PHONY: helmify
+helmify: $(HELMIFY) ## Download helmify locally if necessary
+$(HELMIFY): $(HELMIFYBIN)
+	test -s $(HELMIFYBIN)/helmify || GOBIN=$(LOCALBIN) github.com/arttor/helmify/cmd/helmify@latest
+
+helm: manifests kustomize helmify
+	$(KUSTOMIZE) build config/default | $(HELMIFY)
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.

@@ -1,0 +1,60 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "chart.fullname" . }}-manager-role
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels
+  - alertdestinations
+  - alertpolicies
+  - alertworkflows
+  - nrqlconditions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/finalizers
+  - alertdestinations/finalizers
+  - alertpolicies/finalizers
+  - alertworkflows/finalizers
+  - nrqlconditions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/status
+  - alertdestinations/status
+  - alertpolicies/status
+  - alertworkflows/status
+  - nrqlconditions/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "chart.fullname" . }}-manager-rolebinding
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: '{{ include "chart.fullname" . }}-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: '{{ include "chart.fullname" . }}-controller-manager'
+  namespace: '{{ .Release.Namespace }}'
