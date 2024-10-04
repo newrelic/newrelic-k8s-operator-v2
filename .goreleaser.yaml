@@ -65,7 +65,7 @@ checksum:
   name_template: 'checksums.txt'
 
 release:
-  name_template: "{{ .ProjectName }} v{{ .Version }}"
+  name_template: "{{ .ProjectName }} v{{ .Version }}-Binary"
 
 changelog:
   sort: asc
