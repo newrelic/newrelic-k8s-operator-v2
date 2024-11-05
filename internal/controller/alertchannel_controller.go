@@ -108,8 +108,10 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	} else {
 		//channel being deleted
 		if controllerutil.ContainsFinalizer(&channel, deleteFinalizer) {
-			if err := r.deleteChannel(&channel); err != nil {
-				return ctrl.Result{}, err
+			if channel.Status.ChannelID != "" {
+				if err := r.deleteChannel(&channel); err != nil {
+					return ctrl.Result{}, err
+				}
 			}
 
 			controllerutil.RemoveFinalizer(&channel, deleteFinalizer)
@@ -172,7 +174,11 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 				}
 			} else {
 				r.Log.Info("No channel id found and no id set in state, creating new channel", "channelName", channel.Spec.Name)
-				err := r.createChannel(&channel)
+				var configuredDestinations alertsv1.AlertDestinationList
+				if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
+					return ctrl.Result{}, err
+				}
+				err := r.createChannel(&channel, &configuredDestinations)
 				if err != nil {
 					return ctrl.Result{}, err
 				}
@@ -186,7 +192,11 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	} else {
 		r.Log.Info("No channel id set in state, creating new channel", "channelName", channel.Spec.Name)
-		err := r.createChannel(&channel)
+		var configuredDestinations alertsv1.AlertDestinationList
+		if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		err := r.createChannel(&channel, &configuredDestinations)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -241,7 +251,31 @@ func (r *AlertChannelReconciler) getExistingChannel(channel *alertsv1.AlertChann
 	return "", nil
 }
 
-func (r *AlertChannelReconciler) createChannel(channel *alertsv1.AlertChannel) error {
+func (r *AlertChannelReconciler) createChannel(channel *alertsv1.AlertChannel, configuredDestinations *alertsv1.AlertDestinationList) error {
+	r.Log.Info("Checking for existing destination", "destinationName", channel.Spec.DestinationName)
+	if len(configuredDestinations.Items) > 0 { //Check for existing operator created destinations
+		for _, destination := range configuredDestinations.Items {
+			if destination.Status.AppliedSpec.Name == channel.Spec.DestinationName {
+				r.Log.Info("Existing destination found", "destinationId", destination.Status.DestinationID)
+				channel.Spec.DestinationID = destination.Status.DestinationID
+				break
+			}
+		}
+	} else { //check for existing destinations in NR (created outside of operator)
+		matchedDestinationID, err := r.getExistingDestination(channel)
+		if err != nil {
+			r.Log.Error(err, "failed to fetch existing destination, cannot create channel without an existing destination")
+			return err
+		}
+		if matchedDestinationID != "" {
+			r.Log.Info("Existing destination found in New Relic", "destinationId", matchedDestinationID)
+			channel.Spec.DestinationID = matchedDestinationID
+		} else {
+			r.Log.Info("No destination exists in New Relic. Channel not created.")
+			return nil
+		}
+	}
+
 	r.Log.Info("Creating channel", "channelName", channel.Spec.Name)
 
 	chanInput := r.translateChannelCreateInput(channel)
@@ -301,6 +335,38 @@ func (r *AlertChannelReconciler) deleteChannel(channel *alertsv1.AlertChannel) e
 	}
 
 	return nil
+}
+
+// getExistingDestination fetches existing destinations
+func (r *AlertChannelReconciler) getExistingDestination(channel *alertsv1.AlertChannel) (string, error) {
+	searchParams := ai.AiNotificationsDestinationFilter{
+		Name: channel.Spec.DestinationName,
+	}
+
+	sorter := notifications.AiNotificationsDestinationSorter{}
+
+	existingDests, err := r.Alerts.Notifications().GetDestinations(channel.Spec.AccountID, "", searchParams, sorter)
+	if err != nil {
+		r.Log.Error(err, "failed to get list of destinations to create channel",
+			"destinationName", channel.Spec.DestinationName,
+			"apiKey", interfaces.PartialAPIKey(r.apiKey),
+		)
+		return "", err
+	}
+
+	if len(existingDests.Entities) > 0 {
+		for _, existingDest := range existingDests.Entities {
+			if existingDest.Name == channel.Spec.DestinationName {
+				r.Log.Info("Found destination based on name, returning")
+				channel.Spec.DestinationID = existingDest.ID
+				break
+			}
+		}
+
+		return channel.Spec.DestinationID, nil
+	}
+
+	return "", nil
 }
 
 func (r *AlertChannelReconciler) translateChannelCreateInput(channel *alertsv1.AlertChannel) notifications.AiNotificationsChannelInput {

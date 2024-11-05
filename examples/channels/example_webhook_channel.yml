@@ -10,7 +10,7 @@ spec:
   apiKey: <api_key>
   region: "US"
   name: "test-webhook-channel"
-  destinationId: "<destination_id>"
+  destinationName: "<destination_name>"
   product: "IINT"
   properties:
     - key: "payload"

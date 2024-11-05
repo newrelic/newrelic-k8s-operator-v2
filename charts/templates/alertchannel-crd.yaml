@@ -58,6 +58,8 @@ spec:
                 type: object
               destinationId:
                 type: string
+              destinationName:
+                type: string
               name:
                 type: string
               product:
@@ -87,7 +89,7 @@ spec:
                 description: AiNotificationsChannelType - Channel type
                 type: string
             required:
-            - destinationId
+            - destinationName
             - name
             - product
             - type
@@ -115,6 +117,8 @@ spec:
                         type: string
                     type: object
                   destinationId:
+                    type: string
+                  destinationName:
                     type: string
                   name:
                     type: string
@@ -145,7 +149,7 @@ spec:
                     description: AiNotificationsChannelType - Channel type
                     type: string
                 required:
-                - destinationId
+                - destinationName
                 - name
                 - product
                 - type

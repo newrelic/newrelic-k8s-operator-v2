@@ -26,7 +26,7 @@ spec:
         - "CLOSED"
       spec:
         name: "test-email-channel"
-        destinationId: "<destination_id>" #required
+        destinationName: "<destination_name>" #required
         product: "IINT"
         properties:
           - key: "subject"
@@ -38,7 +38,7 @@ spec:
         - "ACTIVATED"
       spec:
         name: "test-mobilepush-channel"
-        destinationId: "<destination_id>" #required
+        destinationName: "<destination_name>" #required
         product: "IINT"
         properties:
           - key: ""
