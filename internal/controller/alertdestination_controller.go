@@ -48,7 +48,7 @@ type AlertDestinationReconciler struct {
 }
 
 // +kubebuilder:rbac:groups=alerts.k8s.newrelic.com,resources=alertdestinations,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=alerts.k8s.newrelic.com,resources=alertdestinations/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=alerts.k8s.newrelic.com,resources=alertdestinations/status,verbs=get;list;watch;update;patch
 // +kubebuilder:rbac:groups=alerts.k8s.newrelic.com,resources=alertdestinations/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to

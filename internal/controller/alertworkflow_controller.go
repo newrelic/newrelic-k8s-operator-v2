@@ -108,14 +108,15 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			}
 		}
 	} else {
-		//Policy is being deleted
+		//Workflow is being deleted
 		if controllerutil.ContainsFinalizer(&workflow, deleteFinalizer) {
 			//our finalizer is present, so handle external dependency
-			if err := r.deleteWorkflow(&workflow); err != nil {
-				//if fail to delete the external dependency here, return with error so it can be retried
-				return ctrl.Result{}, err
+			if workflow.Status.WorkflowID != "" {
+				if err := r.deleteWorkflow(&workflow); err != nil {
+					//if fail to delete the external dependency here, return with error so it can be retried
+					return ctrl.Result{}, err
+				}
 			}
-
 			//remove finalizer from the list and update it
 			controllerutil.RemoveFinalizer(&workflow, deleteFinalizer)
 			if err := r.Update(ctx, &workflow); err != nil {
@@ -138,7 +139,11 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			if len(workflow.Spec.Channels) > 0 {
 				if r.haveChannelsChanged(&workflow) {
 					r.Log.Info("channel spec changed, updating channels")
-					r.handleChannels(&workflow)
+					var configuredDestinations alertsv1.AlertDestinationList
+					if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
+						return ctrl.Result{}, err
+					}
+					r.handleChannels(&workflow, &configuredDestinations)
 					r.updateWorkflow(&workflow)
 
 					//Update Workflow Status
@@ -164,7 +169,11 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			}
 		} else {
 			r.Log.Info("Workflow ID does not exist in New Relic. May have been deleted outside of operator, creating...")
-			channelErr := r.createChannels(&workflow)
+			var configuredDestinations alertsv1.AlertDestinationList
+			if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
+				return ctrl.Result{}, err
+			}
+			channelErr := r.createChannels(&workflow, &configuredDestinations)
 			if channelErr != nil {
 				return ctrl.Result{}, err
 			}
@@ -184,7 +193,11 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	} else { //no workflowId in state, so create -- TODO: need to be able to filter by name when fetching, client currently only allows ID
 		r.Log.Info("No workflow id in state - Creating new workflow")
-		channelErr := r.createChannels(&workflow)
+		var configuredDestinations alertsv1.AlertDestinationList
+		if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
+			return ctrl.Result{}, err
+		}
+		channelErr := r.createChannels(&workflow, &configuredDestinations)
 		if channelErr != nil {
 			return ctrl.Result{}, err
 		}
@@ -266,15 +279,17 @@ func (r *AlertWorkflowReconciler) haveChannelsChanged(workflow *alertsv1.AlertWo
 type processedAlertChannels struct {
 	accountId int //nolint:golint
 	id        string
+	name      string
 	processed bool
 }
 
-func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflow) error {
+func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflow, configuredDestinations *alertsv1.AlertDestinationList) error {
 	processedChannels := []processedAlertChannels{}
 	for i, existing := range workflow.Status.AppliedSpec.Channels {
 		processedChannels = append(processedChannels, processedAlertChannels{
 			accountId: workflow.Spec.AccountID,
 			id:        existing.ChannelID,
+			name:      existing.Spec.Name,
 			processed: false,
 		})
 		if i < len(workflow.Spec.Channels) {
@@ -309,7 +324,7 @@ func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflo
 			}
 		} else { //channel doesn't exist in NR (newly added to spec), create it
 			r.Log.Info("Channel does not exist, creating channel", "channelName", configuredChannel.Spec.Name)
-			createdChannel, err := r.createChannel(&configuredChannel, workflow.Spec.AccountID)
+			createdChannel, err := r.createChannel(&configuredChannel, workflow.Spec.AccountID, configuredDestinations)
 			if err != nil {
 				r.Log.Error(err, "Failed to create channel",
 					"channelName", configuredChannel.Spec.Name,
@@ -324,10 +339,13 @@ func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflo
 	if len(processedChannels) > 0 {
 		for _, pc := range processedChannels {
 			if !pc.processed {
-				r.Log.Info("deleting channel", "channelId", pc.id)
-				err := r.deleteChannel(pc)
-				if err != nil {
-					return err
+				if pc.id != "" {
+					err := r.deleteChannel(pc)
+					if err != nil {
+						return err
+					}
+				} else {
+					r.Log.Info("channelId empty - cannot delete channel", "channelName", pc.name)
 				}
 			}
 		}
@@ -338,28 +356,55 @@ func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflo
 	return nil
 }
 
-func (r *AlertWorkflowReconciler) createChannels(workflow *alertsv1.AlertWorkflow) error {
+func (r *AlertWorkflowReconciler) createChannels(workflow *alertsv1.AlertWorkflow, configuredDestinations *alertsv1.AlertDestinationList) error {
 	r.Log.Info("Creating destination channels")
 
 	workflow.Status.AppliedSpec = &alertsv1.AlertWorkflowSpec{}
 	workflow.Status.AppliedSpec.Channels = workflow.Spec.Channels
 
 	for i, channel := range workflow.Spec.Channels {
-		createdChannel, err := r.createChannel(&channel, workflow.Spec.AccountID)
+		createdChannel, err := r.createChannel(&channel, workflow.Spec.AccountID, configuredDestinations)
 		if err != nil {
 			r.Log.Error(err, "Failed to create channel",
 				"channelName", channel.Spec.Name,
 			)
+			return err
 		}
-		channel.ChannelID = createdChannel.ChannelID
-		workflow.Spec.Channels[i] = *createdChannel
-		workflow.Status.AppliedSpec.Channels[i] = *createdChannel
+		if createdChannel != nil {
+			channel.ChannelID = createdChannel.ChannelID
+			workflow.Spec.Channels[i] = *createdChannel
+			workflow.Status.AppliedSpec.Channels[i] = *createdChannel
+		}
 	}
 
 	return nil
 }
 
-func (r *AlertWorkflowReconciler) createChannel(channel *alertsv1.DestinationChannel, accountID int) (*alertsv1.DestinationChannel, error) {
+func (r *AlertWorkflowReconciler) createChannel(channel *alertsv1.DestinationChannel, accountID int, configuredDestinations *alertsv1.AlertDestinationList) (*alertsv1.DestinationChannel, error) {
+	r.Log.Info("Checking for existing destination", "destinationName", channel.Spec.DestinationName)
+	if len(configuredDestinations.Items) > 0 { //Check for existing operator created destinations
+		for _, destination := range configuredDestinations.Items {
+			if destination.Status.AppliedSpec.Name == channel.Spec.DestinationName {
+				r.Log.Info("Existing destination found", "destinationId", destination.Status.DestinationID)
+				channel.Spec.DestinationID = destination.Status.DestinationID
+				break
+			}
+		}
+	} else { //check for existing destinations in NR (created outside of operator)
+		matchedDestinationID, err := r.getExistingDestination(channel, accountID)
+		if err != nil {
+			r.Log.Error(err, "failed to fetch existing destination, cannot create channel without an existing destination")
+			return nil, err
+		}
+
+		if matchedDestinationID != "" {
+			r.Log.Info("Existing destination found in New Relic", "destinationId", matchedDestinationID)
+			channel.Spec.DestinationID = matchedDestinationID
+		} else {
+			return nil, errors.New("no destination exists in New Relic to create channel, workflow will not be created")
+		}
+	}
+
 	r.Log.Info("Creating channel", "channelName", channel.Spec.Name)
 
 	chanInput := r.translateChannelCreateInput(channel)
@@ -379,6 +424,38 @@ func (r *AlertWorkflowReconciler) createChannel(channel *alertsv1.DestinationCha
 	channel.ChannelID = createdChannel.Channel.ID
 
 	return channel, nil
+}
+
+// getExistingDestination fetches existing destinations
+func (r *AlertWorkflowReconciler) getExistingDestination(channel *alertsv1.DestinationChannel, accountId int) (string, error) { //nolint:golint
+	searchParams := ai.AiNotificationsDestinationFilter{
+		Name: channel.Spec.DestinationName,
+	}
+
+	sorter := notifications.AiNotificationsDestinationSorter{}
+
+	existingDests, err := r.Alerts.Notifications().GetDestinations(accountId, "", searchParams, sorter)
+	if err != nil {
+		r.Log.Error(err, "failed to get list of destinations to create channel",
+			"destinationName", channel.Spec.DestinationName,
+			"apiKey", interfaces.PartialAPIKey(r.apiKey),
+		)
+		return "", err
+	}
+
+	if len(existingDests.Entities) > 0 {
+		for _, existingDest := range existingDests.Entities {
+			if existingDest.Name == channel.Spec.DestinationName {
+				r.Log.Info("Found destination based on name, returning")
+				channel.Spec.DestinationID = existingDest.ID
+				break
+			}
+		}
+
+		return channel.Spec.DestinationID, nil
+	}
+
+	return "", nil
 }
 
 func (r *AlertWorkflowReconciler) updateChannel(channel *alertsv1.DestinationChannel, accountID int) (*alertsv1.DestinationChannel, error) {

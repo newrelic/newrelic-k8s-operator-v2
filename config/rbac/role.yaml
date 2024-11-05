@@ -5,6 +5,14 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - alerts.k8s.newrelic.com
   resources:
   - alertchannels
@@ -34,7 +42,6 @@ rules:
   - alerts.k8s.newrelic.com
   resources:
   - alertchannels/status
-  - alertdestinations/status
   - alertpolicies/status
   - alertworkflows/status
   - nrqlconditions/status
@@ -42,3 +49,13 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertdestinations/status
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
