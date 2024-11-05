@@ -10,6 +10,6 @@ spec:
   apiKey: <api_key>
   region: "US"
   name: "test-snow-channel"
-  destinationId: "<destination_id>"
+  destinationName: "<destination_name>"
   product: "IINT"
   type: "SERVICE_NOW_APP"

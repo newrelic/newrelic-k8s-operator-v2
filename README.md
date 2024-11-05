@@ -3,6 +3,7 @@
 # New Relic K8s Resource Operator
 - [Overview](#overview)
 - [Quick Start](#quick-start)
+- [Helm](#helm)
 - [Provisioning Resources](#provisioning-resources)
 - [Development](#development)
 
@@ -80,6 +81,25 @@ The operator can be removed with the reverse of installation:
 ```bash
 kustomize build github.com/newrelic/newrelic-k8s-operator-v2/config/default | kubectl delete -f -
 ```
+
+# Helm
+Helm charts are available via [Github Pages](https://newrelic.github.io/newrelic-k8s-operator-v2/)
+
+## Install
+
+```bash
+helm repo add newrelic-resource-operator https://newrelic.github.io/newrelic-k8s-operator-v2/
+helm repo update
+
+helm install nr-operator-v2 newrelic-resource-operator/nr-operator-v2
+```
+
+## Uninstall
+
+```bash
+helm uninstall nr-operator-v2
+```
+
 
 # Provisioning Resources
 

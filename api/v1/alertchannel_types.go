@@ -26,16 +26,17 @@ import (
 
 // AlertChannelSpec defines the desired state of AlertChannel
 type AlertChannelSpec struct {
-	APIKey        string                                   `json:"apiKey,omitempty"`
-	APIKeySecret  NewRelicSecret                           `json:"apiKeySecret,omitempty"`
-	AccountID     int                                      `json:"accountId,omitempty"`
-	Region        string                                   `json:"region,omitempty"`
-	DestinationID string                                   `json:"destinationId"`
-	Name          string                                   `json:"name"`
-	Active        bool                                     `json:"active,omitempty"`
-	Properties    []AiNotificationsPropertyInput           `json:"properties,omitempty"`
-	Product       notifications.AiNotificationsProduct     `json:"product"`
-	Type          notifications.AiNotificationsChannelType `json:"type"`
+	APIKey          string                                   `json:"apiKey,omitempty"`
+	APIKeySecret    NewRelicSecret                           `json:"apiKeySecret,omitempty"`
+	AccountID       int                                      `json:"accountId,omitempty"`
+	Region          string                                   `json:"region,omitempty"`
+	DestinationName string                                   `json:"destinationName"`
+	DestinationID   string                                   `json:"destinationId,omitempty"`
+	Name            string                                   `json:"name"`
+	Active          bool                                     `json:"active,omitempty"`
+	Properties      []AiNotificationsPropertyInput           `json:"properties,omitempty"`
+	Product         notifications.AiNotificationsProduct     `json:"product"`
+	Type            notifications.AiNotificationsChannelType `json:"type"`
 }
 
 // AlertChannelStatus defines the observed state of AlertChannel
