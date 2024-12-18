@@ -18,11 +18,12 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	kErr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,7 +67,7 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	var destination alertsv1.AlertDestination
 	err := r.Get(ctx, req.NamespacedName, &destination)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if kErr.IsNotFound(err) {
 			r.Log.Info("Destination 'not found' after being deleted. This is expected and no cause for alarm", "error", err)
 			return ctrl.Result{}, nil
 		}
@@ -245,8 +246,19 @@ func (r *AlertDestinationReconciler) updateDestination(destination *alertsv1.Ale
 func (r *AlertDestinationReconciler) deleteDestination(destination *alertsv1.AlertDestination) error {
 	r.Log.Info("Deleting destination", "destinationId", destination.Status.DestinationID)
 
-	_, err := r.Alerts.Notifications().AiNotificationsDeleteDestination(destination.Status.AppliedSpec.AccountID, destination.Status.DestinationID)
+	deletedDestination, err := r.Alerts.Notifications().AiNotificationsDeleteDestination(destination.Status.AppliedSpec.AccountID, destination.Status.DestinationID)
+
 	if err != nil {
+		r.Log.Error(err, "failed to delete destination",
+			"destinationId", destination.Status.DestinationID,
+			"accountId", destination.Status.AppliedSpec.AccountID,
+			"destinationName", destination.Status.AppliedSpec.Name,
+		)
+		return err
+	}
+
+	if len(deletedDestination.Errors) > 0 {
+		err = errors.New(deletedDestination.Errors[0].Description)
 		r.Log.Error(err, "failed to delete destination",
 			"destinationId", destination.Status.DestinationID,
 			"accountId", destination.Status.AppliedSpec.AccountID,
