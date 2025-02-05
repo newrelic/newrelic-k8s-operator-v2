@@ -25,11 +25,11 @@ Docker Images are available in [DockerHub](https://hub.docker.com/r/newrelic/new
 
 ## Running Locally w/ Kind
 
-1. Install docker, kubectl, kustomize, and kind
+1. Install docker, kubectl, kustomize, helm, and kind
 
 ```bash
 brew cask install docker
-brew install kubernetes-cli kustomize kind
+brew install kubernetes-cli kustomize helm kind
 ```
 
 2. Create a test cluster with `kind`
@@ -39,14 +39,25 @@ kind create cluster --name newrelic-test
 kubectl cluster-info
 ```
 
-3. Install the operator in the test cluster
+3. Install cert-manager
+
+```bash
+kubectl apply --validate=false -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
+```
+
+> <small>**Note:** This takes a minute or two to finish so wait a minute before going on to the next step.</small>
+
+You can also confirm it's running with the command `kubectl rollout status deployment -n cert-manager cert-manager-webhook`
+
+4. Install operator
 
 ```bash
 kustomize build github.com/newrelic/newrelic-k8s-operator-v2/config/default | kubectl apply -f -
 ```
+
 > <small>**Note:** This will install operator on whatever kubernetes cluster kubectl is configured to use.</small>
 
-4. Validate pods are running
+5. Validate pods are running
 
 ```bash
 kubectl get pods -n newrelic-k8s-operator-v2-system

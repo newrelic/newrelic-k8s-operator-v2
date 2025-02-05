@@ -14,5 +14,5 @@ spec:
   #   keyName: api-key
   accountId: 1
   region: "US"
-  name: test-policy
-  incidentPreference: "PER_CONDITION"
+  name: Test-Policy-K8s
+  incidentPreference: PER_CONDITION

@@ -25,7 +25,7 @@ spec:
         enabled: true
         runbookUrl: "https://www.google.com"
         terms:
-          - threshold: "95"
+          - threshold: "60"
             thresholdOccurrences: ALL
             thresholdDuration: 120
             priority: CRITICAL
@@ -44,7 +44,7 @@ spec:
           evaluationDelay: 5
           aggregationMethod: EVENT_FLOW
           aggregationDelay: 60
-        baselineDirection: "UPPER_ONLY"
+        baselineDirection: UPPER_AND_LOWER
     - spec:
         name: "Example NRQL Static Condition"
         description: "test description"
@@ -54,7 +54,7 @@ spec:
         enabled: true
         runbookUrl: "https://www.google.com"
         terms:
-          - threshold: "65"
+          - threshold: "60"
             thresholdOccurrences: ALL
             thresholdDuration: 60
             priority: CRITICAL
