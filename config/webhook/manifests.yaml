@@ -1,0 +1,212 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertchannel
+  failurePolicy: Fail
+  name: malertchannel.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertchannels
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertdestination
+  failurePolicy: Fail
+  name: malertdestination.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertdestinations
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertpolicy
+  failurePolicy: Fail
+  name: malertpolicy.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertpolicies
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertworkflow
+  failurePolicy: Fail
+  name: malertworkflow.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertworkflows
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-alerts-k8s-newrelic-com-v1-nrqlcondition
+  failurePolicy: Fail
+  name: mnrqlcondition.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - nrqlconditions
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-alerts-k8s-newrelic-com-v1-alertchannel
+  failurePolicy: Fail
+  name: valertchannel.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertchannels
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-alerts-k8s-newrelic-com-v1-alertdestination
+  failurePolicy: Fail
+  name: valertdestination.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertdestinations
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-alerts-k8s-newrelic-com-v1-alertpolicy
+  failurePolicy: Fail
+  name: valertpolicy.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertpolicies
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-alerts-k8s-newrelic-com-v1-alertworkflow
+  failurePolicy: Fail
+  name: valertworkflow.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertworkflows
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-alerts-k8s-newrelic-com-v1-nrqlcondition
+  failurePolicy: Fail
+  name: vnrqlcondition.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - nrqlconditions
+  sideEffects: None

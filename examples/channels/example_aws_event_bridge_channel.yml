@@ -1,0 +1,20 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertChannel
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertchannel-event-bridge-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  region: "US"
+  name: "test-event-bridge-channel"
+  destinationName: "TestBridge"
+  product: "IINT"
+  properties:
+    - key: "eventSource"
+      value: "aws.partner/mydomain/myaccountid/name"
+    - key: "eventContent"
+      value: "{ id: {{ json issueId }} }"
+  type: "EVENT_BRIDGE"

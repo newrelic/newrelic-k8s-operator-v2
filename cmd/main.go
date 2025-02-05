@@ -208,6 +208,37 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "AlertWorkflow")
 		os.Exit(1)
 	}
+
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&alertsv1.AlertPolicy{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "AlertPolicy")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&alertsv1.NrqlCondition{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "NrqlCondition")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&alertsv1.AlertDestination{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "AlertDestination")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&alertsv1.AlertChannel{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "AlertChannel")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&alertsv1.AlertWorkflow{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "AlertWorkflow")
+			os.Exit(1)
+		}
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
