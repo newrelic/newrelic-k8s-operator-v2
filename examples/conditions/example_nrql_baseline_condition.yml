@@ -13,17 +13,17 @@ spec:
   #   namespace: default
   #   key_name: api-key
   region: "US"
-  name: "Example Nrql Baseline Condition"
+  name: "Example Baseline Condition"
   description: "test description"
   # Must reference an existing New Relic alert policy from your account
   existingPolicyId: "123456"
   type: BASELINE
   nrql:
-    query: "SELECT count(*) FROM Transaction"
+    query: "SELECT count(*) FROM Transactio22n"
   enabled: true
   runbookUrl: "https://www.google.com"
   terms:
-    - threshold: "85"
+    - threshold: "60"
       thresholdOccurrences: ALL
       thresholdDuration: 120
       priority: CRITICAL
@@ -34,7 +34,7 @@ spec:
     openViolationOnExpiration: false
   signal:
     aggregationWindow: 60
-    evaluationDelay: 5
-    aggregationMethod: EVENT_FLOW
-    aggregationDelay: 60
+    aggregationMethod: EVENT_TIMER
+    #aggregationDelay: 60
+    aggregationTimer: 60
   baselineDirection: "UPPER_ONLY" # UPPER_ONLY | LOWER_ONLY | UPPER_AND_LOWER

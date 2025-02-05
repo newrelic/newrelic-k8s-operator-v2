@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -168,8 +169,19 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 						r.Log.Info("Checking if conditions need to be updated...")
 
 						if !r.haveConditionsChanged(&policy) {
-							r.Log.Info("Conditions unchanged - skipping handle")
-							return ctrl.Result{}, err
+							r.Log.Info("Condition spec and status match - validating conditions exist in New Relic")
+							hasMismatch, err := r.conditionHasRemoteMismatch(&policy)
+							if err != nil {
+								return ctrl.Result{}, err
+							}
+							if !hasMismatch {
+								r.Log.Info("All applied conditions have associated conditions in New Relic. No condition updates to apply.")
+								return ctrl.Result{}, nil
+							} else {
+								r.Log.Info("One or more conditions were deleted in New Relic, but still exists in appliedStatus - attempting to recreate.")
+							}
+						} else {
+							r.Log.Info("Condition spec and status mismatch - updating conditions...")
 						}
 						r.handleConditions(&policy)
 
@@ -226,6 +238,7 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			}
 
 			//Update Policy Status
+			r.Log.Info("Updating status...")
 			err = r.Status().Update(ctx, &policy)
 			if err != nil {
 				r.Log.Error(err, "failed to update AlertPolicy status")
@@ -397,6 +410,7 @@ func (r *AlertPolicyReconciler) getExistingPolicyByName(policy *alertsv1.AlertPo
 	return nil, nil
 }
 
+// haveConditionsChanged validates if condition spec and appliedStatus differ
 func (r *AlertPolicyReconciler) haveConditionsChanged(policy *alertsv1.AlertPolicy) bool {
 	configuredConditions := policy.Spec.Conditions
 	observedConditions := policy.Status.AppliedSpec.Conditions
@@ -412,6 +426,25 @@ func (r *AlertPolicyReconciler) haveConditionsChanged(policy *alertsv1.AlertPoli
 	}
 
 	return false
+}
+
+// conditionHasRemoteMismatch fetches conditions from existing policy and determines if condition in appliedSpec has been deleted in New Relic
+func (r *AlertPolicyReconciler) conditionHasRemoteMismatch(policy *alertsv1.AlertPolicy) (bool, error) {
+	observedConditions := policy.Status.AppliedSpec.Conditions
+
+	for _, observedCondition := range observedConditions {
+		existingCondition, err := r.getExistingNrqlCondition(&observedCondition, policy)
+		if err != nil {
+			r.Log.Error(err, "failed to fetch existing condition")
+			return false, err
+		}
+
+		if existingCondition == nil { // condition deleted on the NR side, so return true to path into handleConditions to recreate it
+			return true, nil
+		} //TODO: add logic to compare retrieved condition spec against appliedStatus spec
+	}
+
+	return false, nil
 }
 
 // hasPolicyChanged checks if existing policy and policy spec differ
@@ -453,12 +486,12 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 		if existingCondition != nil { // if condition exists in NR already by name
 			for _, observedCondition := range policy.Status.AppliedSpec.Conditions {
 				if observedCondition.Name == configuredCondition.Spec.Name { // if condition exists in both spec/current state
-					configuredCondition.Name = observedCondition.Name
-					configuredCondition.ID = observedCondition.ID
+					configuredCondition.Name = existingCondition.Name
+					configuredCondition.ID = existingCondition.ID
 					processedConditions[i].processed = true
 
-					if !reflect.DeepEqual(configuredCondition.Spec, observedCondition.Spec) { //compare spec/status to determine if config mismatch
-						r.Log.Info("Configurations differ. Updating condition")
+					if !reflect.DeepEqual(configuredCondition.Spec, observedCondition.Spec) { //compare spec/status state to determine if config mismatch
+						r.Log.Info("Configuration difference detected. Updating condition to current spec specified.")
 						updatedCondition, err := r.updateCondition(&configuredCondition, policy)
 						if err != nil {
 							return err
@@ -774,5 +807,6 @@ func (r *AlertPolicyReconciler) getAPIKeyOrSecret(policy alertsv1.AlertPolicy) (
 func (r *AlertPolicyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&alertsv1.AlertPolicy{}).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Complete(r)
 }

@@ -1,0 +1,21 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: AlertDestination
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: alertdestination-event-bridge-example
+spec:
+  accountId: 1
+  apiKey: <api_key>
+  region: "US"
+  name: "test-event-bridge-destination"
+  properties:
+    - displayValue: "aws_account_id"
+      key: "AWSAccountId"
+      value: "123456"
+    - displayValue: "aws_region"
+      key: "AWSRegion"
+      value: "us-east-2"
+  type: "EVENT_BRIDGE"
+  active: true

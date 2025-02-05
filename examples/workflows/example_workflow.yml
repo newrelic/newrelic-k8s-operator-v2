@@ -19,7 +19,7 @@ spec:
         operator: "EXACTLY_MATCHES"
         values:
           - "my-policy"
-  mutingRulesHandling: "DONT_NOTIFY_FULLY_MUTED_ISSUES"
+  mutingRulesHandling: "DONT_NOTIFY_FULLY_OR_PARTIALLY_MUTED_ISSUES"
   channels: #required
     - notificationTriggers:
         - "ACTIVATED"

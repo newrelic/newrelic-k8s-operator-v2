@@ -17,6 +17,10 @@ resources:
   kind: AlertPolicy
   path: github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1
   version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -26,6 +30,10 @@ resources:
   kind: NrqlCondition
   path: github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1
   version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -35,6 +43,10 @@ resources:
   kind: AlertDestination
   path: github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1
   version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -44,6 +56,10 @@ resources:
   kind: AlertChannel
   path: github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1
   version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -53,4 +69,8 @@ resources:
   kind: AlertWorkflow
   path: github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1
   version: v1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 version: "3"
