@@ -154,12 +154,16 @@ func (r *AlertChannel) ValidateChannelSchema() field.ErrorList {
 		if r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.EMAIL &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.EVENT_BRIDGE &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.JIRA_CLASSIC &&
+			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.JIRA_NEXTGEN &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.MOBILE_PUSH &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.PAGERDUTY_ACCOUNT_INTEGRATION &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.PAGERDUTY_SERVICE_INTEGRATION &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.SERVICE_NOW_APP &&
+			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.SERVICENOW_INCIDENTS &&
+			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.SLACK &&
+			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.SLACK_COLLABORATION &&
 			r.Spec.Type != notifications.AiNotificationsChannelTypeTypes.WEBHOOK {
-			channelErrs = append(channelErrs, field.TypeInvalid(field.NewPath("spec").Child("type"), r.Spec.Type, "invalid channel type - must be one of: EMAIL | EVENT_BRIDGE | JIRA | MOBILE_PUSH | PAGERDUTY_SERVICE_INTEGRATION | PAGERDUTY_ACCOUNT_INTEGRATION | SERVICE_NOW_APP | WEBHOOK"))
+			channelErrs = append(channelErrs, field.TypeInvalid(field.NewPath("spec").Child("type"), r.Spec.Type, "invalid channel type - must be one of: EMAIL | EVENT_BRIDGE | JIRA_CLASSIC | JIRA_NEXTGEN | MOBILE_PUSH | PAGERDUTY_SERVICE_INTEGRATION | PAGERDUTY_ACCOUNT_INTEGRATION | SERVICE_NOW_APP | SERVICENOW_INCIDENTS | SLACK | SLACK_COLLABORATION | WEBHOOK"))
 		}
 	}
 
@@ -197,6 +201,10 @@ func (r *AlertChannel) ValidateChannelSchema() field.ErrorList {
 						channelErrs = append(channelErrs, field.TypeInvalid(field.NewPath("spec").Child("properties").Index(i).Child("key"), prop.Key, "Key must be one of: summary | service | email | customDetails"))
 					}
 				case notifications.AiNotificationsChannelTypeTypes.SLACK:
+					if prop.Key != "channelId" && prop.Key != "customDetailsSlack" {
+						channelErrs = append(channelErrs, field.TypeInvalid(field.NewPath("spec").Child("properties").Index(i).Child("key"), prop.Key, "Key must be one of: channelId | customDetailsSlack"))
+					}
+				case notifications.AiNotificationsChannelTypeTypes.SLACK_COLLABORATION:
 					if prop.Key != "channelId" && prop.Key != "customDetailsSlack" {
 						channelErrs = append(channelErrs, field.TypeInvalid(field.NewPath("spec").Child("properties").Index(i).Child("key"), prop.Key, "Key must be one of: channelId | customDetailsSlack"))
 					}
