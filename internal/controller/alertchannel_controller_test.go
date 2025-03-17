@@ -27,7 +27,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	alertsv1 "github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1"
+	alertsv1 "github.com/newrelic/newrelic-k8s-operator-v2/api/v1"
 )
 
 var _ = Describe("AlertChannel Controller", func() {

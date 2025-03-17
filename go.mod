@@ -1,4 +1,4 @@
-module github.com/newrelic/newrelic-kubernetes-operator-v2
+module github.com/newrelic/newrelic-k8s-operator-v2
 
 go 1.23.1
 
