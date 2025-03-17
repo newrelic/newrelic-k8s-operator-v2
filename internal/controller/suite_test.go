@@ -33,7 +33,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	alertsv1 "github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1"
+	alertsv1 "github.com/newrelic/newrelic-k8s-operator-v2/api/v1"
 	// +kubebuilder:scaffold:imports
 )
 

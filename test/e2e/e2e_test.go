@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/newrelic/newrelic-kubernetes-operator-v2/test/utils"
+	"github.com/newrelic/newrelic-k8s-operator-v2/test/utils"
 )
 
 const namespace = "newrelic-kubernetes-operator-v2-system"

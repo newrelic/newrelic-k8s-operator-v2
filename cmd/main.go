@@ -35,9 +35,9 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	alertsv1 "github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1"
-	"github.com/newrelic/newrelic-kubernetes-operator-v2/interfaces"
-	"github.com/newrelic/newrelic-kubernetes-operator-v2/internal/controller"
+	alertsv1 "github.com/newrelic/newrelic-k8s-operator-v2/api/v1"
+	"github.com/newrelic/newrelic-k8s-operator-v2/interfaces"
+	"github.com/newrelic/newrelic-k8s-operator-v2/internal/controller"
 	// +kubebuilder:scaffold:imports
 )
 

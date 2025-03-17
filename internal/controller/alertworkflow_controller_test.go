@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	alertsv1 "github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1"
+	alertsv1 "github.com/newrelic/newrelic-k8s-operator-v2/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
