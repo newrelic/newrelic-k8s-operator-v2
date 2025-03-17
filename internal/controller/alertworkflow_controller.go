@@ -35,8 +35,8 @@ import (
 	"github.com/newrelic/newrelic-client-go/v2/pkg/ai"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/notifications"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/workflows"
-	alertsv1 "github.com/newrelic/newrelic-kubernetes-operator-v2/api/v1"
-	"github.com/newrelic/newrelic-kubernetes-operator-v2/interfaces"
+	alertsv1 "github.com/newrelic/newrelic-k8s-operator-v2/api/v1"
+	"github.com/newrelic/newrelic-k8s-operator-v2/interfaces"
 )
 
 // AlertWorkflowReconciler reconciles a AlertWorkflow object
