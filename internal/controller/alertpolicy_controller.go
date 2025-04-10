@@ -248,34 +248,35 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
+	//Update Policy Status
+	err = r.Status().Update(ctx, &policy)
+	if err != nil {
+		r.Log.Error(err, "failed to update AlertPolicy status")
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
 // createPolicy creates a new policy
 func (r *AlertPolicyReconciler) createPolicy(policy *alertsv1.AlertPolicy) error {
-	const (
-		PerPolicy             alerts.IncidentPreferenceType = "PER_POLICY"
-		PerConditon           alerts.IncidentPreferenceType = "PER_CONDITION"
-		PerConditionAndTarget alerts.IncidentPreferenceType = "PER_CONDITION_AND_TARGET"
-	)
-
-	var incPref alerts.IncidentPreferenceType
+	var incPref alerts.AlertsIncidentPreference
 	switch policy.Spec.IncidentPreference {
 	case "PER_POLICY":
-		incPref = PerPolicy
+		incPref = alerts.AlertsIncidentPreferenceTypes.PER_POLICY
 	case "PER_CONDITION":
-		incPref = PerConditon
+		incPref = alerts.AlertsIncidentPreferenceTypes.PER_CONDITION
 	case "PER_CONDITION_AND_TARGET":
-		incPref = PerConditionAndTarget
+		incPref = alerts.AlertsIncidentPreferenceTypes.PER_CONDITION_AND_TARGET
 	default:
-		incPref = "PER_CONDITION"
+		incPref = alerts.AlertsIncidentPreferenceTypes.PER_CONDITION
 	}
 
-	alertPolicy := alerts.Policy{
+	alertPolicy := alerts.AlertsPolicyInput{
 		IncidentPreference: incPref,
 		Name:               policy.Spec.Name,
 	}
-	createdPolicy, err := r.Alerts.Alerts().CreatePolicy(alertPolicy)
+	createdPolicy, err := r.Alerts.Alerts().CreatePolicyMutation(policy.Spec.AccountID, alertPolicy)
 	if err != nil {
 		r.Log.Error(err, "failed to create policy with inputs",
 			"incidentPreference", policy.Spec.IncidentPreference,
@@ -287,8 +288,13 @@ func (r *AlertPolicyReconciler) createPolicy(policy *alertsv1.AlertPolicy) error
 	}
 
 	r.Log.Info("Successfully created New Relic alert policy", "policyID", createdPolicy.ID)
+	createdPolicyId, convertErr := strconv.Atoi(createdPolicy.ID)
+	if convertErr != nil {
+		r.Log.Error(err, "failed to convert policyId to type int")
+		return err
+	}
 
-	policy.Status.PolicyID = createdPolicy.ID
+	policy.Status.PolicyID = createdPolicyId
 	policy.Status.AppliedSpec = &alertsv1.AlertPolicySpec{}
 	policy.Status.AppliedSpec.Name = createdPolicy.Name
 	policy.Status.AppliedSpec.IncidentPreference = string(createdPolicy.IncidentPreference)
@@ -382,6 +388,15 @@ func (r *AlertPolicyReconciler) deletePolicy(policy *alertsv1.AlertPolicy) error
 
 // checkForExistingPolicy fetches a list of policies by name and validates if spec matches existing
 func (r *AlertPolicyReconciler) getExistingPolicyByName(policy *alertsv1.AlertPolicy) (*alerts.Policy, error) {
+
+	//TODO: switch to GraphQL once PR merged here: https://github.com/newrelic/newrelic-client-go/pull/1285
+	// listParams := alerts.AlertsPoliciesSearchCriteriaInput{name: Policy.Spec.Name}
+
+	// existingPolicies, err := r.Alerts.Alerts().QueryPolicySearch(policy.Spec.AccountID, testParams)
+	// if err != nil {
+	// 	r.Log.Info("newPolicyError", "err", err)
+	// }
+
 	listParams := alerts.ListPoliciesParams{
 		Name: policy.Spec.Name,
 	}
@@ -403,6 +418,15 @@ func (r *AlertPolicyReconciler) getExistingPolicyByName(policy *alertsv1.AlertPo
 				break
 			}
 		}
+
+		policy.Status.PolicyID = existingPol.ID
+		policy.Status.AppliedSpec = &alertsv1.AlertPolicySpec{}
+		policy.Status.AppliedSpec.Name = existingPol.Name
+		policy.Status.AppliedSpec.IncidentPreference = string(existingPol.IncidentPreference)
+		policy.Status.AppliedSpec.Region = policy.Spec.Region
+		policy.Status.AppliedSpec.AccountID = policy.Spec.AccountID
+		policy.Status.AppliedSpec.APIKey = policy.Spec.APIKey
+		policy.Status.AppliedSpec.APIKeySecret = policy.Spec.APIKeySecret
 
 		return existingPol, nil
 	}
