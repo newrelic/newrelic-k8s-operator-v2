@@ -9,6 +9,6 @@ entries:
     name: nr-operator-v2
     type: application
     urls:
-    - https://github.com/newrelic/newrelic-k8s-operator-v2/nr-operator-v2-1.6.0.tgz
+    - https://github.com/newrelic/newrelic-k8s-operator-v2/releases/download/nr-operator-v2-1.6.0.tgz
     version: 1.6.0
 generated: "2025-04-10T09:45:26.975001-04:00"
