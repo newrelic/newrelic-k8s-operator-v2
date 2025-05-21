@@ -22,6 +22,7 @@ controllerManager:
   podSecurityContext:
     runAsNonRoot: true
   replicas: 1
+  hostNetwork: false
   serviceAccount:
     annotations: {}
 kubernetesClusterDomain: cluster.local
