@@ -2,8 +2,18 @@ apiVersion: v1
 entries:
   nr-operator-v2:
   - apiVersion: v2
+    appVersion: 1.6.2
+    created: "2025-06-09T11:17:22.802695-04:00"
+    description: A Helm chart for newrelic/newrelic-k8s-operator-v2
+    digest: 26020c2223b9e24c64ece4997bc5cbb466ea940e18325d469fe4cf1c339e6880
+    name: nr-operator-v2
+    type: application
+    urls:
+    - https://github.com/newrelic/newrelic-k8s-operator-v2/releases/download/v1.6.2/nr-operator-v2-1.6.2.tgz
+    version: 1.6.2
+  - apiVersion: v2
     appVersion: 1.6.1
-    created: "2025-05-21T09:17:12.003822-04:00"
+    created: "2025-06-09T11:17:22.80151-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
     digest: 4180df8a3fbd1d6d2449034a1b0270fa05ad7de12da7f9165d3ee4dc63c1726b
     name: nr-operator-v2
@@ -13,7 +23,7 @@ entries:
     version: 1.6.1
   - apiVersion: v2
     appVersion: 1.6.0
-    created: "2025-05-21T09:17:12.002509-04:00"
+    created: "2025-06-09T11:17:22.800359-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
     digest: 2824cd889f50befa9fe548ec1ecc076fb0d64853a5e5d3da7f93823a397fa9f3
     name: nr-operator-v2
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/newrelic/newrelic-k8s-operator-v2/releases/download/v1.6.0/nr-operator-v2-1.6.0.tgz
     version: 1.6.0
-generated: "2025-05-21T09:17:12.000351-04:00"
+generated: "2025-06-09T11:17:22.799174-04:00"
