@@ -715,6 +715,7 @@ func (r *AlertWorkflowReconciler) translateWorkflowCreateInput(workflow *alertsv
 	workflowInput.EnrichmentsEnabled = workflow.Spec.EnrichmentsEnabled
 	workflowInput.MutingRulesHandling = workflow.Spec.MutingRulesHandling
 	workflowInput.WorkflowEnabled = workflow.Spec.Enabled
+	workflowInput.DestinationsEnabled = true
 
 	if workflow.Spec.Channels != nil {
 		for _, channel := range workflow.Spec.Channels {
@@ -770,6 +771,8 @@ func (r *AlertWorkflowReconciler) translateWorkflowUpdateInput(workflow *alertsv
 	workflowInput.EnrichmentsEnabled = &workflow.Spec.EnrichmentsEnabled
 	workflowInput.MutingRulesHandling = workflow.Spec.MutingRulesHandling
 	workflowInput.WorkflowEnabled = &workflow.Spec.Enabled
+	destinationEnabled := true
+	workflowInput.DestinationsEnabled = &destinationEnabled
 
 	if workflow.Spec.Channels != nil {
 		if workflowInput.DestinationConfigurations == nil {
