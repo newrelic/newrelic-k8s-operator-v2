@@ -1,0 +1,2602 @@
+---
+# Source: nr-operator-v2/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-nr-operator-v2-controller-manager
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    {}
+---
+# Source: nr-operator-v2/templates/alertchannel-crd.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: alertchannels.alerts.k8s.newrelic.com
+  annotations:
+    cert-manager.io/inject-ca-from: 'default/release-name-nr-operator-v2-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: AlertChannel
+    listKind: AlertChannelList
+    plural: alertchannels
+    singular: alertchannel
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AlertChannel is the Schema for the alertchannels API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlertChannelSpec defines the desired state of AlertChannel
+            properties:
+              accountId:
+                type: integer
+              active:
+                type: boolean
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              destinationId:
+                type: string
+              destinationName:
+                type: string
+              name:
+                type: string
+              product:
+                description: AiNotificationsProduct - Product types
+                type: string
+              properties:
+                items:
+                  description: AiNotificationsPropertyInput defines the inputs for a
+                    given destination type
+                  properties:
+                    displayValue:
+                      type: string
+                    key:
+                      type: string
+                    label:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - key
+                  - value
+                  type: object
+                type: array
+              region:
+                type: string
+              type:
+                description: AiNotificationsChannelType - Channel type
+                type: string
+            required:
+            - destinationName
+            - name
+            - product
+            - type
+            type: object
+          status:
+            description: AlertChannelStatus defines the observed state of AlertChannel
+            properties:
+              appliedSpec:
+                description: AlertChannelSpec defines the desired state of AlertChannel
+                properties:
+                  accountId:
+                    type: integer
+                  active:
+                    type: boolean
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  destinationId:
+                    type: string
+                  destinationName:
+                    type: string
+                  name:
+                    type: string
+                  product:
+                    description: AiNotificationsProduct - Product types
+                    type: string
+                  properties:
+                    items:
+                      description: AiNotificationsPropertyInput defines the inputs for
+                        a given destination type
+                      properties:
+                        displayValue:
+                          type: string
+                        key:
+                          type: string
+                        label:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                  region:
+                    type: string
+                  type:
+                    description: AiNotificationsChannelType - Channel type
+                    type: string
+                required:
+                - destinationName
+                - name
+                - product
+                - type
+                type: object
+              channelId:
+                type: string
+            required:
+            - appliedSpec
+            - channelId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+# Source: nr-operator-v2/templates/alertdestination-crd.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: alertdestinations.alerts.k8s.newrelic.com
+  annotations:
+    cert-manager.io/inject-ca-from: 'default/release-name-nr-operator-v2-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: AlertDestination
+    listKind: AlertDestinationList
+    plural: alertdestinations
+    singular: alertdestination
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AlertDestination is the Schema for the alertdestinations API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlertDestinationSpec defines the desired state of AlertDestination
+            properties:
+              accountId:
+                type: integer
+              active:
+                type: boolean
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              auth:
+                description: AiNotificationsCredentialsInput - Credential input object
+                properties:
+                  basic:
+                    description: AiNotificationsBasicAuthInput - Basic auth input object
+                    properties:
+                      password:
+                        description: password
+                        type: string
+                      user:
+                        description: user
+                        type: string
+                    required:
+                    - password
+                    - user
+                    type: object
+                  customHeaders:
+                    description: AiNotificationsCustomHeadersAuthInput - Custom headers
+                      auth input object
+                    properties:
+                      customHeaders:
+                        items:
+                          description: AiNotificationsCustomHeaderInput - Custom header
+                            input object
+                          properties:
+                            key:
+                              description: key
+                              type: string
+                            value:
+                              description: value
+                              type: string
+                          required:
+                          - key
+                          type: object
+                        type: array
+                    type: object
+                  oauth2:
+                    description: AiNotificationsOAuth2AuthInput - OAuth2 auth input
+                      object
+                    properties:
+                      accessTokenUrl:
+                        description: accessTokenUrl
+                        type: string
+                      authorizationUrl:
+                        description: authorizationUrl
+                        type: string
+                      clientId:
+                        description: clientId
+                        type: string
+                      clientSecret:
+                        description: clientSecret
+                        type: string
+                      prefix:
+                        description: prefix
+                        type: string
+                      refreshInterval:
+                        description: refreshInterval
+                        type: integer
+                      refreshToken:
+                        description: refreshToken
+                        type: string
+                      refreshable:
+                        description: refreshable
+                        type: boolean
+                      scope:
+                        description: scope
+                        type: string
+                      token:
+                        description: token
+                        type: string
+                    required:
+                    - accessTokenUrl
+                    - authorizationUrl
+                    - clientId
+                    - clientSecret
+                    - refreshable
+                    - token
+                    type: object
+                  token:
+                    description: AiNotificationsTokenAuthInput - Token auth input object
+                    properties:
+                      prefix:
+                        description: prefix
+                        type: string
+                      token:
+                        description: token
+                        type: string
+                    required:
+                    - token
+                    type: object
+                  type:
+                    description: AiNotificationsAuthType - Authentication types
+                    type: string
+                required:
+                - type
+                type: object
+              id:
+                type: string
+              name:
+                type: string
+              properties:
+                items:
+                  description: AiNotificationsPropertyInput defines the inputs for a
+                    given destination type
+                  properties:
+                    displayValue:
+                      type: string
+                    key:
+                      type: string
+                    label:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - key
+                  - value
+                  type: object
+                type: array
+              region:
+                type: string
+              secureUrl:
+                description: AiNotificationsSecureURLInput - Destination SecureUrlInput
+                  object
+                properties:
+                  prefix:
+                    description: prefix
+                    type: string
+                  secureSuffix:
+                    description: secureSuffix
+                    type: string
+                required:
+                - prefix
+                - secureSuffix
+                type: object
+              type:
+                description: AiNotificationsDestinationType - Destination types
+                type: string
+            required:
+            - name
+            - properties
+            - type
+            type: object
+          status:
+            description: AlertDestinationStatus defines the observed state of AlertDestination
+            properties:
+              appliedSpec:
+                description: AlertDestinationSpec defines the desired state of AlertDestination
+                properties:
+                  accountId:
+                    type: integer
+                  active:
+                    type: boolean
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  auth:
+                    description: AiNotificationsCredentialsInput - Credential input
+                      object
+                    properties:
+                      basic:
+                        description: AiNotificationsBasicAuthInput - Basic auth input
+                          object
+                        properties:
+                          password:
+                            description: password
+                            type: string
+                          user:
+                            description: user
+                            type: string
+                        required:
+                        - password
+                        - user
+                        type: object
+                      customHeaders:
+                        description: AiNotificationsCustomHeadersAuthInput - Custom
+                          headers auth input object
+                        properties:
+                          customHeaders:
+                            items:
+                              description: AiNotificationsCustomHeaderInput - Custom
+                                header input object
+                              properties:
+                                key:
+                                  description: key
+                                  type: string
+                                value:
+                                  description: value
+                                  type: string
+                              required:
+                              - key
+                              type: object
+                            type: array
+                        type: object
+                      oauth2:
+                        description: AiNotificationsOAuth2AuthInput - OAuth2 auth input
+                          object
+                        properties:
+                          accessTokenUrl:
+                            description: accessTokenUrl
+                            type: string
+                          authorizationUrl:
+                            description: authorizationUrl
+                            type: string
+                          clientId:
+                            description: clientId
+                            type: string
+                          clientSecret:
+                            description: clientSecret
+                            type: string
+                          prefix:
+                            description: prefix
+                            type: string
+                          refreshInterval:
+                            description: refreshInterval
+                            type: integer
+                          refreshToken:
+                            description: refreshToken
+                            type: string
+                          refreshable:
+                            description: refreshable
+                            type: boolean
+                          scope:
+                            description: scope
+                            type: string
+                          token:
+                            description: token
+                            type: string
+                        required:
+                        - accessTokenUrl
+                        - authorizationUrl
+                        - clientId
+                        - clientSecret
+                        - refreshable
+                        - token
+                        type: object
+                      token:
+                        description: AiNotificationsTokenAuthInput - Token auth input
+                          object
+                        properties:
+                          prefix:
+                            description: prefix
+                            type: string
+                          token:
+                            description: token
+                            type: string
+                        required:
+                        - token
+                        type: object
+                      type:
+                        description: AiNotificationsAuthType - Authentication types
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  properties:
+                    items:
+                      description: AiNotificationsPropertyInput defines the inputs for
+                        a given destination type
+                      properties:
+                        displayValue:
+                          type: string
+                        key:
+                          type: string
+                        label:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                  region:
+                    type: string
+                  secureUrl:
+                    description: AiNotificationsSecureURLInput - Destination SecureUrlInput
+                      object
+                    properties:
+                      prefix:
+                        description: prefix
+                        type: string
+                      secureSuffix:
+                        description: secureSuffix
+                        type: string
+                    required:
+                    - prefix
+                    - secureSuffix
+                    type: object
+                  type:
+                    description: AiNotificationsDestinationType - Destination types
+                    type: string
+                required:
+                - name
+                - properties
+                - type
+                type: object
+              destinationId:
+                type: string
+            required:
+            - appliedSpec
+            - destinationId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+# Source: nr-operator-v2/templates/alertpolicy-crd.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: alertpolicies.alerts.k8s.newrelic.com
+  annotations:
+    cert-manager.io/inject-ca-from: 'default/release-name-nr-operator-v2-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: AlertPolicy
+    listKind: AlertPolicyList
+    plural: alertpolicies
+    singular: alertpolicy
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AlertPolicy is the Schema for the alertpolicies API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlertPolicySpec defines the desired state of AlertPolicy
+            properties:
+              accountId:
+                type: integer
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              conditions:
+                items:
+                  description: PolicyCondition defines the conditions contained within
+                    an AlertPolicy
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    spec:
+                      description: PolicyConditionSpec defines the desired state of
+                        PolicyCondition
+                      properties:
+                        accountId:
+                          type: integer
+                        apiKey:
+                          type: string
+                        apiKeySecret:
+                          description: NewRelicSecret masks sensitive data input into
+                            configs
+                          properties:
+                            keyName:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                        baselineDirection:
+                          description: NrqlBaselineDirection
+                          type: string
+                        description:
+                          type: string
+                        enabled:
+                          type: boolean
+                        existingPolicyId:
+                          type: string
+                        expiration:
+                          description: AlertsNrqlConditionExpiration - Settings for
+                            how violations are opened or closed when a signal expires.
+                          properties:
+                            closeViolationsOnExpiration:
+                              type: boolean
+                            expirationDuration:
+                              type: integer
+                            ignoreOnExpectedTermination:
+                              type: boolean
+                            openViolationOnExpiration:
+                              type: boolean
+                          type: object
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        nrql:
+                          description: NrqlConditionCreateQuery defines a nrql configuration
+                          properties:
+                            dataAccountId:
+                              type: integer
+                            evaluationOffset:
+                              type: integer
+                            query:
+                              type: string
+                          type: object
+                        region:
+                          type: string
+                        runbookUrl:
+                          type: string
+                        signal:
+                          description: AlertsNrqlConditionSignal - Configuration that
+                            defines the signal that the NRQL condition will use to evaluate.
+                          properties:
+                            aggregationDelay:
+                              type: integer
+                            aggregationMethod:
+                              description: NrqlConditionAggregationMethod - The available
+                                aggregation methods.
+                              type: string
+                            aggregationTimer:
+                              type: integer
+                            aggregationWindow:
+                              type: integer
+                            evaluationDelay:
+                              type: integer
+                            evaluationOffset:
+                              type: integer
+                            fillOption:
+                              description: |-
+                                AlertsFillOption - The available fill options.
+                                nolint:revive
+                              type: string
+                            fillValue:
+                              type: number
+                            slideBy:
+                              type: integer
+                          type: object
+                        terms:
+                          items:
+                            description: AlertsNrqlConditionTerm represents the terms
+                              of a New Relic alert condition.
+                            properties:
+                              operator:
+                                description: AlertsNRQLConditionTermsOperator - Operator
+                                  used to compare against the threshold for NrqlConditions.
+                                type: string
+                              priority:
+                                description: NrqlConditionPriority specifies the priority
+                                  for alert condition terms.
+                                type: string
+                              threshold:
+                                type: string
+                              thresholdDuration:
+                                type: integer
+                              thresholdOccurrences:
+                                description: ThresholdOccurrence specifies the threshold
+                                  occurrence for NRQL alert condition terms.
+                                type: string
+                            type: object
+                          type: array
+                        titleTemplate:
+                          type: string
+                        type:
+                          description: NrqlConditionType specifies the type of NRQL
+                            alert condition.
+                          type: string
+                        violationTimeLimit:
+                          description: NrqlConditionViolationTimeLimit specifies the
+                            value function of NRQL alert condition.
+                          type: string
+                        violationTimeLimitSeconds:
+                          type: integer
+                      type: object
+                  type: object
+                type: array
+              incidentPreference:
+                enum:
+                - PER_POLICY
+                - PER_CONDITION
+                - PER_CONDITION_AND_TARGET
+                type: string
+              name:
+                type: string
+              region:
+                type: string
+            required:
+            - name
+            - region
+            type: object
+          status:
+            description: AlertPolicyStatus defines the observed state of AlertPolicy
+            properties:
+              appliedSpec:
+                description: AlertPolicySpec defines the desired state of AlertPolicy
+                properties:
+                  accountId:
+                    type: integer
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  conditions:
+                    items:
+                      description: PolicyCondition defines the conditions contained
+                        within an AlertPolicy
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        spec:
+                          description: PolicyConditionSpec defines the desired state
+                            of PolicyCondition
+                          properties:
+                            accountId:
+                              type: integer
+                            apiKey:
+                              type: string
+                            apiKeySecret:
+                              description: NewRelicSecret masks sensitive data input
+                                into configs
+                              properties:
+                                keyName:
+                                  type: string
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
+                            baselineDirection:
+                              description: NrqlBaselineDirection
+                              type: string
+                            description:
+                              type: string
+                            enabled:
+                              type: boolean
+                            existingPolicyId:
+                              type: string
+                            expiration:
+                              description: AlertsNrqlConditionExpiration - Settings
+                                for how violations are opened or closed when a signal
+                                expires.
+                              properties:
+                                closeViolationsOnExpiration:
+                                  type: boolean
+                                expirationDuration:
+                                  type: integer
+                                ignoreOnExpectedTermination:
+                                  type: boolean
+                                openViolationOnExpiration:
+                                  type: boolean
+                              type: object
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                            nrql:
+                              description: NrqlConditionCreateQuery defines a nrql configuration
+                              properties:
+                                dataAccountId:
+                                  type: integer
+                                evaluationOffset:
+                                  type: integer
+                                query:
+                                  type: string
+                              type: object
+                            region:
+                              type: string
+                            runbookUrl:
+                              type: string
+                            signal:
+                              description: AlertsNrqlConditionSignal - Configuration
+                                that defines the signal that the NRQL condition will
+                                use to evaluate.
+                              properties:
+                                aggregationDelay:
+                                  type: integer
+                                aggregationMethod:
+                                  description: NrqlConditionAggregationMethod - The
+                                    available aggregation methods.
+                                  type: string
+                                aggregationTimer:
+                                  type: integer
+                                aggregationWindow:
+                                  type: integer
+                                evaluationDelay:
+                                  type: integer
+                                evaluationOffset:
+                                  type: integer
+                                fillOption:
+                                  description: |-
+                                    AlertsFillOption - The available fill options.
+                                    nolint:revive
+                                  type: string
+                                fillValue:
+                                  type: number
+                                slideBy:
+                                  type: integer
+                              type: object
+                            terms:
+                              items:
+                                description: AlertsNrqlConditionTerm represents the
+                                  terms of a New Relic alert condition.
+                                properties:
+                                  operator:
+                                    description: AlertsNRQLConditionTermsOperator -
+                                      Operator used to compare against the threshold
+                                      for NrqlConditions.
+                                    type: string
+                                  priority:
+                                    description: NrqlConditionPriority specifies the
+                                      priority for alert condition terms.
+                                    type: string
+                                  threshold:
+                                    type: string
+                                  thresholdDuration:
+                                    type: integer
+                                  thresholdOccurrences:
+                                    description: ThresholdOccurrence specifies the threshold
+                                      occurrence for NRQL alert condition terms.
+                                    type: string
+                                type: object
+                              type: array
+                            titleTemplate:
+                              type: string
+                            type:
+                              description: NrqlConditionType specifies the type of NRQL
+                                alert condition.
+                              type: string
+                            violationTimeLimit:
+                              description: NrqlConditionViolationTimeLimit specifies
+                                the value function of NRQL alert condition.
+                              type: string
+                            violationTimeLimitSeconds:
+                              type: integer
+                          type: object
+                      type: object
+                    type: array
+                  incidentPreference:
+                    enum:
+                    - PER_POLICY
+                    - PER_CONDITION
+                    - PER_CONDITION_AND_TARGET
+                    type: string
+                  name:
+                    type: string
+                  region:
+                    type: string
+                required:
+                - name
+                - region
+                type: object
+              policyId:
+                type: integer
+            required:
+            - appliedSpec
+            - policyId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+# Source: nr-operator-v2/templates/alertworkflow-crd.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: alertworkflows.alerts.k8s.newrelic.com
+  annotations:
+    cert-manager.io/inject-ca-from: 'default/release-name-nr-operator-v2-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: AlertWorkflow
+    listKind: AlertWorkflowList
+    plural: alertworkflows
+    singular: alertworkflow
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: AlertWorkflow is the Schema for the alertworkflows API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AlertWorkflowSpec defines the desired state of AlertWorkflow
+            properties:
+              accountId:
+                type: integer
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              channels:
+                items:
+                  description: DestinationChannel defines the channels attached to a
+                    workflow
+                  properties:
+                    channelId:
+                      type: string
+                    notificationTriggers:
+                      items:
+                        description: AiWorkflowsNotificationTrigger - Notification Triggers
+                          for the Destination Configuration
+                        type: string
+                      type: array
+                    spec:
+                      description: DestinationChannelSpec defines the desired state
+                        of a DestinationChannel
+                      properties:
+                        accountId:
+                          type: integer
+                        active:
+                          type: boolean
+                        apiKey:
+                          type: string
+                        apiKeySecret:
+                          description: NewRelicSecret masks sensitive data input into
+                            configs
+                          properties:
+                            keyName:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                        destinationId:
+                          type: string
+                        destinationName:
+                          type: string
+                        name:
+                          type: string
+                        product:
+                          description: AiNotificationsProduct - Product types
+                          type: string
+                        properties:
+                          items:
+                            description: AiNotificationsPropertyInput defines the inputs
+                              for a given destination type
+                            properties:
+                              displayValue:
+                                type: string
+                              key:
+                                type: string
+                              label:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        region:
+                          type: string
+                        type:
+                          description: AiNotificationsChannelType - Channel type
+                          type: string
+                      required:
+                      - destinationName
+                      - name
+                      - product
+                      - type
+                      type: object
+                    updateOriginalMessage:
+                      type: boolean
+                  required:
+                  - notificationTriggers
+                  type: object
+                type: array
+              channelsEnabled:
+                type: boolean
+              enabled:
+                type: boolean
+              enrichments:
+                description: AiWorkflowsEnrichmentsInput defines optional enrichment
+                  for a workflow
+                properties:
+                  nrql:
+                    items:
+                      description: AiWorkflowsNRQLEnrichmentInput - NRQL type enrichment
+                        input object
+                      properties:
+                        configuration:
+                          items:
+                            description: AiWorkflowsNRQLConfigurationInput - NRQL type
+                              configuration input object
+                            properties:
+                              query:
+                                type: string
+                            required:
+                            - query
+                            type: object
+                          type: array
+                        name:
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                type: object
+              enrichmentsEnabled:
+                type: boolean
+              issuesFilter:
+                description: AiWorkflowsFilterInput defines the filters for a workflow
+                properties:
+                  name:
+                    type: string
+                  predicates:
+                    items:
+                      description: AiWorkflowsPredicateInput - PredicateInput input
+                        object
+                      properties:
+                        attribute:
+                          type: string
+                        operator:
+                          description: AiWorkflowsOperator - Type of Filter
+                          type: string
+                        values:
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - attribute
+                      - operator
+                      - values
+                      type: object
+                    type: array
+                  type:
+                    description: AiWorkflowsFilterType - Type of Filter
+                    type: string
+                required:
+                - type
+                type: object
+              mutingRulesHandling:
+                description: AiWorkflowsMutingRulesHandling - The wanted behavior for
+                  muted issues in the workflow
+                type: string
+              name:
+                type: string
+              region:
+                type: string
+            required:
+            - channels
+            - mutingRulesHandling
+            - name
+            type: object
+          status:
+            description: AlertWorkflowStatus defines the observed state of AlertWorkflow
+            properties:
+              appliedSpec:
+                description: AlertWorkflowSpec defines the desired state of AlertWorkflow
+                properties:
+                  accountId:
+                    type: integer
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  channels:
+                    items:
+                      description: DestinationChannel defines the channels attached
+                        to a workflow
+                      properties:
+                        channelId:
+                          type: string
+                        notificationTriggers:
+                          items:
+                            description: AiWorkflowsNotificationTrigger - Notification
+                              Triggers for the Destination Configuration
+                            type: string
+                          type: array
+                        spec:
+                          description: DestinationChannelSpec defines the desired state
+                            of a DestinationChannel
+                          properties:
+                            accountId:
+                              type: integer
+                            active:
+                              type: boolean
+                            apiKey:
+                              type: string
+                            apiKeySecret:
+                              description: NewRelicSecret masks sensitive data input
+                                into configs
+                              properties:
+                                keyName:
+                                  type: string
+                                name:
+                                  type: string
+                                namespace:
+                                  type: string
+                              type: object
+                            destinationId:
+                              type: string
+                            destinationName:
+                              type: string
+                            name:
+                              type: string
+                            product:
+                              description: AiNotificationsProduct - Product types
+                              type: string
+                            properties:
+                              items:
+                                description: AiNotificationsPropertyInput defines the
+                                  inputs for a given destination type
+                                properties:
+                                  displayValue:
+                                    type: string
+                                  key:
+                                    type: string
+                                  label:
+                                    type: string
+                                  value:
+                                    type: string
+                                required:
+                                - key
+                                - value
+                                type: object
+                              type: array
+                            region:
+                              type: string
+                            type:
+                              description: AiNotificationsChannelType - Channel type
+                              type: string
+                          required:
+                          - destinationName
+                          - name
+                          - product
+                          - type
+                          type: object
+                        updateOriginalMessage:
+                          type: boolean
+                      required:
+                      - notificationTriggers
+                      type: object
+                    type: array
+                  channelsEnabled:
+                    type: boolean
+                  enabled:
+                    type: boolean
+                  enrichments:
+                    description: AiWorkflowsEnrichmentsInput defines optional enrichment
+                      for a workflow
+                    properties:
+                      nrql:
+                        items:
+                          description: AiWorkflowsNRQLEnrichmentInput - NRQL type enrichment
+                            input object
+                          properties:
+                            configuration:
+                              items:
+                                description: AiWorkflowsNRQLConfigurationInput - NRQL
+                                  type configuration input object
+                                properties:
+                                  query:
+                                    type: string
+                                required:
+                                - query
+                                type: object
+                              type: array
+                            name:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                    type: object
+                  enrichmentsEnabled:
+                    type: boolean
+                  issuesFilter:
+                    description: AiWorkflowsFilterInput defines the filters for a workflow
+                    properties:
+                      name:
+                        type: string
+                      predicates:
+                        items:
+                          description: AiWorkflowsPredicateInput - PredicateInput input
+                            object
+                          properties:
+                            attribute:
+                              type: string
+                            operator:
+                              description: AiWorkflowsOperator - Type of Filter
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - attribute
+                          - operator
+                          - values
+                          type: object
+                        type: array
+                      type:
+                        description: AiWorkflowsFilterType - Type of Filter
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  mutingRulesHandling:
+                    description: AiWorkflowsMutingRulesHandling - The wanted behavior
+                      for muted issues in the workflow
+                    type: string
+                  name:
+                    type: string
+                  region:
+                    type: string
+                required:
+                - channels
+                - mutingRulesHandling
+                - name
+                type: object
+              workflowId:
+                type: string
+            required:
+            - appliedSpec
+            - workflowId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+# Source: nr-operator-v2/templates/nrqlcondition-crd.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: nrqlconditions.alerts.k8s.newrelic.com
+  annotations:
+    cert-manager.io/inject-ca-from: 'default/release-name-nr-operator-v2-serving-cert'
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: NrqlCondition
+    listKind: NrqlConditionList
+    plural: nrqlconditions
+    singular: nrqlcondition
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.created
+      name: Created
+      type: boolean
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: NrqlCondition is the Schema for the nrqlconditions API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: NrqlConditionSpec defines the desired state of NrqlCondition
+            properties:
+              accountId:
+                type: integer
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              baselineDirection:
+                description: NrqlBaselineDirection
+                type: string
+              description:
+                type: string
+              enabled:
+                type: boolean
+              existingPolicyId:
+                type: string
+              expiration:
+                description: AlertsNrqlConditionExpiration - Settings for how violations
+                  are opened or closed when a signal expires.
+                properties:
+                  closeViolationsOnExpiration:
+                    type: boolean
+                  expirationDuration:
+                    type: integer
+                  ignoreOnExpectedTermination:
+                    type: boolean
+                  openViolationOnExpiration:
+                    type: boolean
+                type: object
+              id:
+                type: integer
+              name:
+                type: string
+              nrql:
+                description: NrqlConditionCreateQuery defines a nrql configuration
+                properties:
+                  dataAccountId:
+                    type: integer
+                  evaluationOffset:
+                    type: integer
+                  query:
+                    type: string
+                type: object
+              region:
+                type: string
+              runbookUrl:
+                type: string
+              signal:
+                description: AlertsNrqlConditionSignal - Configuration that defines
+                  the signal that the NRQL condition will use to evaluate.
+                properties:
+                  aggregationDelay:
+                    type: integer
+                  aggregationMethod:
+                    description: NrqlConditionAggregationMethod - The available aggregation
+                      methods.
+                    type: string
+                  aggregationTimer:
+                    type: integer
+                  aggregationWindow:
+                    type: integer
+                  evaluationDelay:
+                    type: integer
+                  evaluationOffset:
+                    type: integer
+                  fillOption:
+                    description: |-
+                      AlertsFillOption - The available fill options.
+                      nolint:revive
+                    type: string
+                  fillValue:
+                    type: number
+                  slideBy:
+                    type: integer
+                type: object
+              terms:
+                items:
+                  description: AlertsNrqlConditionTerm represents the terms of a New
+                    Relic alert condition.
+                  properties:
+                    operator:
+                      description: AlertsNRQLConditionTermsOperator - Operator used
+                        to compare against the threshold for NrqlConditions.
+                      type: string
+                    priority:
+                      description: NrqlConditionPriority specifies the priority for
+                        alert condition terms.
+                      type: string
+                    threshold:
+                      type: string
+                    thresholdDuration:
+                      type: integer
+                    thresholdOccurrences:
+                      description: ThresholdOccurrence specifies the threshold occurrence
+                        for NRQL alert condition terms.
+                      type: string
+                  type: object
+                type: array
+              titleTemplate:
+                type: string
+              type:
+                description: NrqlConditionType specifies the type of NRQL alert condition.
+                type: string
+              violationTimeLimit:
+                description: NrqlConditionViolationTimeLimit specifies the value function
+                  of NRQL alert condition.
+                type: string
+              violationTimeLimitSeconds:
+                type: integer
+            type: object
+          status:
+            description: NrqlConditionStatus defines the observed state of NrqlCondition
+            properties:
+              appliedSpec:
+                description: NrqlConditionSpec defines the desired state of NrqlCondition
+                properties:
+                  accountId:
+                    type: integer
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  baselineDirection:
+                    description: NrqlBaselineDirection
+                    type: string
+                  description:
+                    type: string
+                  enabled:
+                    type: boolean
+                  existingPolicyId:
+                    type: string
+                  expiration:
+                    description: AlertsNrqlConditionExpiration - Settings for how violations
+                      are opened or closed when a signal expires.
+                    properties:
+                      closeViolationsOnExpiration:
+                        type: boolean
+                      expirationDuration:
+                        type: integer
+                      ignoreOnExpectedTermination:
+                        type: boolean
+                      openViolationOnExpiration:
+                        type: boolean
+                    type: object
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  nrql:
+                    description: NrqlConditionCreateQuery defines a nrql configuration
+                    properties:
+                      dataAccountId:
+                        type: integer
+                      evaluationOffset:
+                        type: integer
+                      query:
+                        type: string
+                    type: object
+                  region:
+                    type: string
+                  runbookUrl:
+                    type: string
+                  signal:
+                    description: AlertsNrqlConditionSignal - Configuration that defines
+                      the signal that the NRQL condition will use to evaluate.
+                    properties:
+                      aggregationDelay:
+                        type: integer
+                      aggregationMethod:
+                        description: NrqlConditionAggregationMethod - The available
+                          aggregation methods.
+                        type: string
+                      aggregationTimer:
+                        type: integer
+                      aggregationWindow:
+                        type: integer
+                      evaluationDelay:
+                        type: integer
+                      evaluationOffset:
+                        type: integer
+                      fillOption:
+                        description: |-
+                          AlertsFillOption - The available fill options.
+                          nolint:revive
+                        type: string
+                      fillValue:
+                        type: number
+                      slideBy:
+                        type: integer
+                    type: object
+                  terms:
+                    items:
+                      description: AlertsNrqlConditionTerm represents the terms of a
+                        New Relic alert condition.
+                      properties:
+                        operator:
+                          description: AlertsNRQLConditionTermsOperator - Operator used
+                            to compare against the threshold for NrqlConditions.
+                          type: string
+                        priority:
+                          description: NrqlConditionPriority specifies the priority
+                            for alert condition terms.
+                          type: string
+                        threshold:
+                          type: string
+                        thresholdDuration:
+                          type: integer
+                        thresholdOccurrences:
+                          description: ThresholdOccurrence specifies the threshold occurrence
+                            for NRQL alert condition terms.
+                          type: string
+                      type: object
+                    type: array
+                  titleTemplate:
+                    type: string
+                  type:
+                    description: NrqlConditionType specifies the type of NRQL alert
+                      condition.
+                    type: string
+                  violationTimeLimit:
+                    description: NrqlConditionViolationTimeLimit specifies the value
+                      function of NRQL alert condition.
+                    type: string
+                  violationTimeLimitSeconds:
+                    type: integer
+                type: object
+              conditionId:
+                type: string
+            required:
+            - appliedSpec
+            - conditionId
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+# Source: nr-operator-v2/templates/alertchannel-editor-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertchannel-editor-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertchannel-viewer-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertchannel-viewer-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertdestination-editor-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertdestination-editor-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertdestinations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertdestinations/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertdestination-viewer-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertdestination-viewer-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertdestinations
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertdestinations/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertpolicy-editor-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertpolicy-editor-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertpolicies/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertpolicy-viewer-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertpolicy-viewer-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertpolicies/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertworkflow-editor-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertworkflow-editor-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertworkflows
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertworkflows/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/alertworkflow-viewer-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-alertworkflow-viewer-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertworkflows
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertworkflows/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/manager-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-manager-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels
+  - alertdestinations
+  - alertpolicies
+  - alertworkflows
+  - nrqlconditions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/finalizers
+  - alertdestinations/finalizers
+  - alertpolicies/finalizers
+  - alertworkflows/finalizers
+  - nrqlconditions/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertchannels/status
+  - alertpolicies/status
+  - alertworkflows/status
+  - nrqlconditions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - alertdestinations/status
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+# Source: nr-operator-v2/templates/metrics-auth-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-metrics-auth-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+# Source: nr-operator-v2/templates/metrics-reader-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-metrics-reader
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/nrqlcondition-editor-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-nrqlcondition-editor-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - nrqlconditions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - nrqlconditions/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/nrqlcondition-viewer-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: release-name-nr-operator-v2-nrqlcondition-viewer-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - nrqlconditions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - alerts.k8s.newrelic.com
+  resources:
+  - nrqlconditions/status
+  verbs:
+  - get
+---
+# Source: nr-operator-v2/templates/manager-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: release-name-nr-operator-v2-manager-rolebinding
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'release-name-nr-operator-v2-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: 'release-name-nr-operator-v2-controller-manager'
+  namespace: 'default'
+---
+# Source: nr-operator-v2/templates/metrics-auth-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: release-name-nr-operator-v2-metrics-auth-rolebinding
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'release-name-nr-operator-v2-metrics-auth-role'
+subjects:
+- kind: ServiceAccount
+  name: 'release-name-nr-operator-v2-controller-manager'
+  namespace: 'default'
+---
+# Source: nr-operator-v2/templates/leader-election-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: release-name-nr-operator-v2-leader-election-role
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+# Source: nr-operator-v2/templates/leader-election-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: release-name-nr-operator-v2-leader-election-rolebinding
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: 'release-name-nr-operator-v2-leader-election-role'
+subjects:
+- kind: ServiceAccount
+  name: 'release-name-nr-operator-v2-controller-manager'
+  namespace: 'default'
+---
+# Source: nr-operator-v2/templates/metrics-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-nr-operator-v2-controller-manager-metrics-service
+  labels:
+    control-plane: controller-manager
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    control-plane: controller-manager
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+---
+# Source: nr-operator-v2/templates/webhook-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-nr-operator-v2-webhook-service
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  selector:
+    control-plane: controller-manager
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 9443
+---
+# Source: nr-operator-v2/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-nr-operator-v2-controller-manager
+  labels:
+    control-plane: controller-manager
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+      app.kubernetes.io/name: nr-operator-v2
+      app.kubernetes.io/instance: release-name
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+        app.kubernetes.io/name: nr-operator-v2
+        app.kubernetes.io/instance: release-name
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+    spec:
+      containers:
+      - args:
+        - --metrics-bind-address=:8443
+        - --leader-elect
+        - --health-probe-bind-address=:8081
+        command:
+        - /manager
+        env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: "cluster.local"
+        image: newrelic/newrelic-k8s-operator-v2:latest
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: release-name-nr-operator-v2-controller-manager
+      hostNetwork: 
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: webhook-server-cert
+---
+# Source: nr-operator-v2/templates/serving-cert.yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: release-name-nr-operator-v2-serving-cert
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  dnsNames:
+  - 'release-name-nr-operator-v2-webhook-service.default.svc'
+  - 'release-name-nr-operator-v2-webhook-service.default.svc.cluster.local'
+  issuerRef:
+    kind: Issuer
+    name: 'release-name-nr-operator-v2-selfsigned-issuer'
+  secretName: webhook-server-cert
+---
+# Source: nr-operator-v2/templates/selfsigned-issuer.yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: release-name-nr-operator-v2-selfsigned-issuer
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selfSigned: {}
+---
+# Source: nr-operator-v2/templates/mutating-webhook-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: release-name-nr-operator-v2-mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: default/release-name-nr-operator-v2-serving-cert
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertchannel
+  failurePolicy: Fail
+  name: malertchannel.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertchannels
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertdestination
+  failurePolicy: Fail
+  name: malertdestination.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertdestinations
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertpolicy
+  failurePolicy: Fail
+  name: malertpolicy.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertpolicies
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /mutate-alerts-k8s-newrelic-com-v1-alertworkflow
+  failurePolicy: Fail
+  name: malertworkflow.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertworkflows
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /mutate-alerts-k8s-newrelic-com-v1-nrqlcondition
+  failurePolicy: Fail
+  name: mnrqlcondition.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - nrqlconditions
+  sideEffects: None
+---
+# Source: nr-operator-v2/templates/validating-webhook-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: release-name-nr-operator-v2-validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: default/release-name-nr-operator-v2-serving-cert
+  labels:
+    helm.sh/chart: nr-operator-v2-1.6.2
+    app.kubernetes.io/name: nr-operator-v2
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.6.2"
+    app.kubernetes.io/managed-by: Helm
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /validate-alerts-k8s-newrelic-com-v1-alertchannel
+  failurePolicy: Fail
+  name: valertchannel.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertchannels
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /validate-alerts-k8s-newrelic-com-v1-alertdestination
+  failurePolicy: Fail
+  name: valertdestination.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertdestinations
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /validate-alerts-k8s-newrelic-com-v1-alertpolicy
+  failurePolicy: Fail
+  name: valertpolicy.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertpolicies
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /validate-alerts-k8s-newrelic-com-v1-alertworkflow
+  failurePolicy: Fail
+  name: valertworkflow.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - alertworkflows
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: 'release-name-nr-operator-v2-webhook-service'
+      namespace: 'default'
+      path: /validate-alerts-k8s-newrelic-com-v1-nrqlcondition
+  failurePolicy: Fail
+  name: vnrqlcondition.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - nrqlconditions
+  sideEffects: None
