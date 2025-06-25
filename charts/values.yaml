@@ -1,3 +1,4 @@
+nameOverride: operator-test
 controllerManager:
   manager:
     args:
@@ -25,6 +26,9 @@ controllerManager:
   hostNetwork: false
   serviceAccount:
     annotations: {}
+  affinity: {}
+  tolerations: {}
+  nodeSelector: {}
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
