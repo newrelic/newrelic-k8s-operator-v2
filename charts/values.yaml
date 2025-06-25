@@ -1,4 +1,3 @@
-nameOverride: operator-test
 controllerManager:
   manager:
     args:
