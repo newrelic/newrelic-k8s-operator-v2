@@ -26,7 +26,7 @@ controllerManager:
   serviceAccount:
     annotations: {}
   affinity: {}
-  tolerations: {}
+  tolerations: []
   nodeSelector: {}
 kubernetesClusterDomain: cluster.local
 metricsService:
