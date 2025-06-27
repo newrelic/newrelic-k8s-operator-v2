@@ -209,6 +209,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	//Tagging
+	if err = (&controller.EntityTaggingReconciler{
+		Client:       mgr.GetClient(),
+		Scheme:       mgr.GetScheme(),
+		Log:          log.WithName("EntityTagging"),
+		EntityClient: interfaces.InitNewClient,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "EntityTagging")
+		os.Exit(1)
+	}
+
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&alertsv1.AlertPolicy{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "AlertPolicy")
@@ -236,6 +247,12 @@ func main() {
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&alertsv1.AlertWorkflow{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "AlertWorkflow")
+			os.Exit(1)
+		}
+	}
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&alertsv1.EntityTagging{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "EntityTagging")
 			os.Exit(1)
 		}
 	}
