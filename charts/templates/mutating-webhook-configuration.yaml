@@ -93,6 +93,26 @@ webhooks:
     service:
       name: '{{ include "chart.fullname" . }}-webhook-service'
       namespace: '{{ .Release.Namespace }}'
+      path: /mutate-alerts-k8s-newrelic-com-v1-entitytagging
+  failurePolicy: Fail
+  name: mentitytagging.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - entitytaggings
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "chart.fullname" . }}-webhook-service'
+      namespace: '{{ .Release.Namespace }}'
       path: /mutate-alerts-k8s-newrelic-com-v1-nrqlcondition
   failurePolicy: Fail
   name: mnrqlcondition.kb.io

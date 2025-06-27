@@ -1,4 +1,4 @@
-# This kustomization.yaml is not intended to be run by itself,
+## This kustomization.yaml is not intended to be run by itself,
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
@@ -7,6 +7,7 @@ resources:
 - bases/alerts.k8s.newrelic.com_alertdestinations.yaml
 - bases/alerts.k8s.newrelic.com_alertchannels.yaml
 - bases/alerts.k8s.newrelic.com_alertworkflows.yaml
+- bases/alerts.k8s.newrelic.com_entitytaggings.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:
@@ -17,6 +18,7 @@ patches:
 # - path: patches/webhook_in_alertdestinations.yaml
 # - path: patches/webhook_in_alertchannels.yaml
 # - path: patches/webhook_in_alertworkflows.yaml
+# - path: patches/webhook_in_entitytaggings.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable cert-manager, uncomment all the sections with [CERTMANAGER] prefix.
@@ -26,6 +28,7 @@ patches:
 # - path: patches/cainjection_in_alertdestinations.yaml
 # - path: patches/cainjection_in_alertchannels.yaml
 # - path: patches/cainjection_in_alertworkflows.yaml
+# - path: patches/cainjection_in_entitytaggings.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # [WEBHOOK] To enable webhook, uncomment the following section

@@ -20,6 +20,7 @@ rules:
   - alertdestinations
   - alertpolicies
   - alertworkflows
+  - entitytaggings
   - nrqlconditions
   verbs:
   - create
@@ -36,6 +37,7 @@ rules:
   - alertdestinations/finalizers
   - alertpolicies/finalizers
   - alertworkflows/finalizers
+  - entitytaggings/finalizers
   - nrqlconditions/finalizers
   verbs:
   - update
@@ -45,6 +47,7 @@ rules:
   - alertchannels/status
   - alertpolicies/status
   - alertworkflows/status
+  - entitytaggings/status
   - nrqlconditions/status
   verbs:
   - get

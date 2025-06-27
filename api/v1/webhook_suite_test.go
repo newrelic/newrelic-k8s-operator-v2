@@ -128,6 +128,9 @@ var _ = BeforeSuite(func() {
 	err = (&AlertWorkflow{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
+	err = (&EntityTagging{}).SetupWebhookWithManager(mgr)
+	Expect(err).NotTo(HaveOccurred())
+
 	// +kubebuilder:scaffold:webhook
 
 	go func() {

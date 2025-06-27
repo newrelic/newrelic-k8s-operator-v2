@@ -5,4 +5,5 @@ resources:
 - alerts_v1_alertdestination.yaml
 - alerts_v1_alertchannel.yaml
 - alerts_v1_alertworkflow.yaml
+- alerts_v1_entitytagging.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

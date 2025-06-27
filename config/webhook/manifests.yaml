@@ -90,6 +90,26 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-alerts-k8s-newrelic-com-v1-entitytagging
+  failurePolicy: Fail
+  name: mentitytagging.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - entitytaggings
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-alerts-k8s-newrelic-com-v1-nrqlcondition
   failurePolicy: Fail
   name: mnrqlcondition.kb.io
@@ -189,6 +209,26 @@ webhooks:
     - UPDATE
     resources:
     - alertworkflows
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-alerts-k8s-newrelic-com-v1-entitytagging
+  failurePolicy: Fail
+  name: ventitytagging.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - entitytaggings
   sideEffects: None
 - admissionReviewVersions:
   - v1

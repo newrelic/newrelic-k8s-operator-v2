@@ -16,6 +16,7 @@ Kubernetes operator that facilitates management of New Relic resources from with
 - Alert Destinations
 - Alert Channels
 - Alert Workflows
+- Entity Tagging
 
 If you are looking for New Relic's Kubernetes operator for managing New Relic's Kubernetes integration, please see [newrelic-k8s-operator](https://github.com/newrelic/newrelic-k8s-operator).
 

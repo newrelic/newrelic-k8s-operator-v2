@@ -22,6 +22,8 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the Project itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
+- entitytagging_editor_role.yaml
+- entitytagging_viewer_role.yaml
 - alertworkflow_editor_role.yaml
 - alertworkflow_viewer_role.yaml
 - alertchannel_editor_role.yaml
