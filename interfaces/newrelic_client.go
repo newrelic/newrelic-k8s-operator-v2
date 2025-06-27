@@ -6,6 +6,7 @@ import (
 	"github.com/newrelic/newrelic-client-go/v2/newrelic"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/alerts"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/config"
+	"github.com/newrelic/newrelic-client-go/v2/pkg/entities"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/notifications"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/workflows"
 )
@@ -13,6 +14,7 @@ import (
 // NewRelicClientInterface defines the methods for interacting with the NR API
 type NewRelicClientInterface interface {
 	Alerts() *alerts.Alerts
+	Entities() *entities.Entities
 	Notifications() *notifications.Notifications
 	Workflows() *workflows.Workflows
 }
@@ -20,6 +22,10 @@ type NewRelicClientInterface interface {
 // NewRelicClientWrapper wraps the New Relic client and implements NewRelicClientInterface
 type NewRelicClientWrapper struct {
 	client *newrelic.NewRelic
+}
+
+func (n *NewRelicClientWrapper) Entities() *entities.Entities {
+	return &n.client.Entities
 }
 
 // Alerts returns the Alerts client
