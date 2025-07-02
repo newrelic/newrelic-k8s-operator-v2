@@ -74,4 +74,3 @@ spec:
       {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
-      
