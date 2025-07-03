@@ -5,10 +5,10 @@ kind: ServiceAccount
 metadata:
   name: nr-operator-nr-operator-v2-controller-manager
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
   annotations:
     {}
@@ -22,10 +22,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -202,10 +202,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -593,10 +593,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -992,10 +992,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -1393,167 +1393,6 @@ status:
   conditions: []
   storedVersions: []
 ---
-# Source: nr-operator-v2/templates/entitytagging-crd.yaml
-apiVersion: apiextensions.k8s.io/v1
-kind: CustomResourceDefinition
-metadata:
-  name: entitytaggings.alerts.k8s.newrelic.com
-  annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
-    controller-gen.kubebuilder.io/version: v0.16.1
-  labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
-    app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  group: alerts.k8s.newrelic.com
-  names:
-    kind: EntityTagging
-    listKind: EntityTaggingList
-    plural: entitytaggings
-    singular: entitytagging
-  scope: Namespaced
-  versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.created
-      name: Created
-      type: boolean
-    name: v1
-    schema:
-      openAPIV3Schema:
-        description: EntityTagging is the Schema for the entitytaggings API
-        properties:
-          apiVersion:
-            description: |-
-              APIVersion defines the versioned schema of this representation of an object.
-              Servers should convert recognized schemas to the latest internal value, and
-              may reject unrecognized values.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
-            type: string
-          kind:
-            description: |-
-              Kind is a string value representing the REST resource this object represents.
-              Servers may infer this from the endpoint the client submits requests to.
-              Cannot be updated.
-              In CamelCase.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-            type: string
-          metadata:
-            type: object
-          spec:
-            description: EntityTaggingSpec defines the desired state of EntityTagging
-            properties:
-              apiKey:
-                type: string
-              apiKeySecret:
-                description: NewRelicSecret masks sensitive data input into configs
-                properties:
-                  keyName:
-                    type: string
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                type: object
-              entityNames:
-                items:
-                  type: string
-                type: array
-              region:
-                description: AccountID    int            `json:"accountId,omitempty"`
-                type: string
-              tags:
-                items:
-                  description: EntityTag represents a single key-value tag to attach
-                    to a condition
-                  properties:
-                    key:
-                      type: string
-                    values:
-                      items:
-                        type: string
-                      type: array
-                  type: object
-                type: array
-            required:
-            - entityNames
-            - tags
-            type: object
-          status:
-            description: EntityTaggingStatus defines the observed state of EntityTagging
-            properties:
-              appliedSpec:
-                description: EntityTaggingSpec defines the desired state of EntityTagging
-                properties:
-                  apiKey:
-                    type: string
-                  apiKeySecret:
-                    description: NewRelicSecret masks sensitive data input into configs
-                    properties:
-                      keyName:
-                        type: string
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    type: object
-                  entityNames:
-                    items:
-                      type: string
-                    type: array
-                  region:
-                    description: AccountID    int            `json:"accountId,omitempty"`
-                    type: string
-                  tags:
-                    items:
-                      description: EntityTag represents a single key-value tag to attach
-                        to a condition
-                      properties:
-                        key:
-                          type: string
-                        values:
-                          items:
-                            type: string
-                          type: array
-                      type: object
-                    type: array
-                required:
-                - entityNames
-                - tags
-                type: object
-              managedEntities:
-                items:
-                  description: ManagedEntity represents an entity name-guid pair stored
-                    in local status
-                  properties:
-                    guid:
-                      description: EntityGUID - An encoded Entity GUID
-                      type: string
-                    name:
-                      type: string
-                  required:
-                  - guid
-                  - name
-                  type: object
-                type: array
-            required:
-            - appliedSpec
-            - managedEntities
-            type: object
-        type: object
-    served: true
-    storage: true
-    subresources:
-      status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
----
 # Source: nr-operator-v2/templates/nrqlcondition-crd.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -1563,10 +1402,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -1871,10 +1710,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertchannel-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1902,10 +1741,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertchannel-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1929,10 +1768,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertdestination-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1960,10 +1799,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertdestination-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1987,10 +1826,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertpolicy-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2018,10 +1857,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertpolicy-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2045,10 +1884,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertworkflow-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2076,10 +1915,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertworkflow-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2097,74 +1936,16 @@ rules:
   verbs:
   - get
 ---
-# Source: nr-operator-v2/templates/entitytagging-editor-rbac.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: nr-operator-nr-operator-v2-entitytagging-editor-role
-  labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
-    app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
-    app.kubernetes.io/managed-by: Helm
-rules:
-- apiGroups:
-  - alerts.k8s.newrelic.com
-  resources:
-  - entitytaggings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - alerts.k8s.newrelic.com
-  resources:
-  - entitytaggings/status
-  verbs:
-  - get
----
-# Source: nr-operator-v2/templates/entitytagging-viewer-rbac.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: nr-operator-nr-operator-v2-entitytagging-viewer-role
-  labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
-    app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
-    app.kubernetes.io/managed-by: Helm
-rules:
-- apiGroups:
-  - alerts.k8s.newrelic.com
-  resources:
-  - entitytaggings
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - alerts.k8s.newrelic.com
-  resources:
-  - entitytaggings/status
-  verbs:
-  - get
----
 # Source: nr-operator-v2/templates/manager-rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-manager-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2182,7 +1963,6 @@ rules:
   - alertdestinations
   - alertpolicies
   - alertworkflows
-  - entitytaggings
   - nrqlconditions
   verbs:
   - create
@@ -2199,7 +1979,6 @@ rules:
   - alertdestinations/finalizers
   - alertpolicies/finalizers
   - alertworkflows/finalizers
-  - entitytaggings/finalizers
   - nrqlconditions/finalizers
   verbs:
   - update
@@ -2209,7 +1988,6 @@ rules:
   - alertchannels/status
   - alertpolicies/status
   - alertworkflows/status
-  - entitytaggings/status
   - nrqlconditions/status
   verbs:
   - get
@@ -2232,10 +2010,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-metrics-auth-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2257,10 +2035,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-metrics-reader
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - nonResourceURLs:
@@ -2274,10 +2052,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-nrqlcondition-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2305,10 +2083,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-nrqlcondition-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2332,10 +2110,10 @@ kind: ClusterRoleBinding
 metadata:
   name: nr-operator-nr-operator-v2-manager-rolebinding
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2352,10 +2130,10 @@ kind: ClusterRoleBinding
 metadata:
   name: nr-operator-nr-operator-v2-metrics-auth-rolebinding
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2372,10 +2150,10 @@ kind: Role
 metadata:
   name: nr-operator-nr-operator-v2-leader-election-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2416,10 +2194,10 @@ kind: RoleBinding
 metadata:
   name: nr-operator-nr-operator-v2-leader-election-rolebinding
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2437,10 +2215,10 @@ metadata:
   name: nr-operator-nr-operator-v2-controller-manager-metrics-service
   labels:
     control-plane: controller-manager
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -2460,10 +2238,10 @@ kind: Service
 metadata:
   name: nr-operator-nr-operator-v2-webhook-service
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -2483,10 +2261,10 @@ metadata:
   name: nr-operator-nr-operator-v2-controller-manager
   labels:
     control-plane: controller-manager
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -2565,10 +2343,10 @@ kind: Certificate
 metadata:
   name: nr-operator-nr-operator-v2-serving-cert
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   dnsNames:
@@ -2585,10 +2363,10 @@ kind: Issuer
 metadata:
   name: nr-operator-nr-operator-v2-selfsigned-issuer
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   selfSigned: {}
@@ -2601,10 +2379,10 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 webhooks:
 - admissionReviewVersions:
@@ -2693,26 +2471,6 @@ webhooks:
     service:
       name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
-      path: /mutate-alerts-k8s-newrelic-com-v1-entitytagging
-  failurePolicy: Fail
-  name: mentitytagging.kb.io
-  rules:
-  - apiGroups:
-    - alerts.k8s.newrelic.com
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - entitytaggings
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: 'nr-operator-nr-operator-v2-webhook-service'
-      namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-nrqlcondition
   failurePolicy: Fail
   name: mnrqlcondition.kb.io
@@ -2736,10 +2494,10 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
-    helm.sh/chart: nr-operator-v2-2.0.0
+    helm.sh/chart: nr-operator-v2-1.6.2
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.0.0"
+    app.kubernetes.io/version: "1.6.2"
     app.kubernetes.io/managed-by: Helm
 webhooks:
 - admissionReviewVersions:
@@ -2821,26 +2579,6 @@ webhooks:
     - UPDATE
     resources:
     - alertworkflows
-  sideEffects: None
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: 'nr-operator-nr-operator-v2-webhook-service'
-      namespace: 'newrelic'
-      path: /validate-alerts-k8s-newrelic-com-v1-entitytagging
-  failurePolicy: Fail
-  name: ventitytagging.kb.io
-  rules:
-  - apiGroups:
-    - alerts.k8s.newrelic.com
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - entitytaggings
   sideEffects: None
 - admissionReviewVersions:
   - v1
