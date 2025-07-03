@@ -3,11 +3,11 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: newrelic-operator-nr-operator-v2-controller-manager
+  name: nr-operator-nr-operator-v2-controller-manager
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -19,12 +19,12 @@ kind: CustomResourceDefinition
 metadata:
   name: alertchannels.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/newrelic-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -199,12 +199,12 @@ kind: CustomResourceDefinition
 metadata:
   name: alertdestinations.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/newrelic-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -590,12 +590,12 @@ kind: CustomResourceDefinition
 metadata:
   name: alertpolicies.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/newrelic-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -989,12 +989,12 @@ kind: CustomResourceDefinition
 metadata:
   name: alertworkflows.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/newrelic-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1399,12 +1399,12 @@ kind: CustomResourceDefinition
 metadata:
   name: entitytaggings.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/newrelic-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1560,12 +1560,12 @@ kind: CustomResourceDefinition
 metadata:
   name: nrqlconditions.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'newrelic/newrelic-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.1
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -1869,11 +1869,11 @@ status:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertchannel-editor-role
+  name: nr-operator-nr-operator-v2-alertchannel-editor-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -1900,11 +1900,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertchannel-viewer-role
+  name: nr-operator-nr-operator-v2-alertchannel-viewer-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -1927,11 +1927,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertdestination-editor-role
+  name: nr-operator-nr-operator-v2-alertdestination-editor-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -1958,11 +1958,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertdestination-viewer-role
+  name: nr-operator-nr-operator-v2-alertdestination-viewer-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -1985,11 +1985,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertpolicy-editor-role
+  name: nr-operator-nr-operator-v2-alertpolicy-editor-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2016,11 +2016,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertpolicy-viewer-role
+  name: nr-operator-nr-operator-v2-alertpolicy-viewer-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2043,11 +2043,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertworkflow-editor-role
+  name: nr-operator-nr-operator-v2-alertworkflow-editor-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2074,11 +2074,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-alertworkflow-viewer-role
+  name: nr-operator-nr-operator-v2-alertworkflow-viewer-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2101,11 +2101,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-entitytagging-editor-role
+  name: nr-operator-nr-operator-v2-entitytagging-editor-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2132,11 +2132,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-entitytagging-viewer-role
+  name: nr-operator-nr-operator-v2-entitytagging-viewer-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2159,11 +2159,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-manager-role
+  name: nr-operator-nr-operator-v2-manager-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2230,11 +2230,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-metrics-auth-role
+  name: nr-operator-nr-operator-v2-metrics-auth-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2255,11 +2255,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-metrics-reader
+  name: nr-operator-nr-operator-v2-metrics-reader
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2272,11 +2272,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-nrqlcondition-editor-role
+  name: nr-operator-nr-operator-v2-nrqlcondition-editor-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2303,11 +2303,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: newrelic-operator-nr-operator-v2-nrqlcondition-viewer-role
+  name: nr-operator-nr-operator-v2-nrqlcondition-viewer-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2330,51 +2330,51 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: newrelic-operator-nr-operator-v2-manager-rolebinding
+  name: nr-operator-nr-operator-v2-manager-rolebinding
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: 'newrelic-operator-nr-operator-v2-manager-role'
+  name: 'nr-operator-nr-operator-v2-manager-role'
 subjects:
 - kind: ServiceAccount
-  name: 'newrelic-operator-nr-operator-v2-controller-manager'
+  name: 'nr-operator-nr-operator-v2-controller-manager'
   namespace: 'newrelic'
 ---
 # Source: nr-operator-v2/templates/metrics-auth-rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: newrelic-operator-nr-operator-v2-metrics-auth-rolebinding
+  name: nr-operator-nr-operator-v2-metrics-auth-rolebinding
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: 'newrelic-operator-nr-operator-v2-metrics-auth-role'
+  name: 'nr-operator-nr-operator-v2-metrics-auth-role'
 subjects:
 - kind: ServiceAccount
-  name: 'newrelic-operator-nr-operator-v2-controller-manager'
+  name: 'nr-operator-nr-operator-v2-controller-manager'
   namespace: 'newrelic'
 ---
 # Source: nr-operator-v2/templates/leader-election-rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: newrelic-operator-nr-operator-v2-leader-election-role
+  name: nr-operator-nr-operator-v2-leader-election-role
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 rules:
@@ -2414,32 +2414,32 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: newrelic-operator-nr-operator-v2-leader-election-rolebinding
+  name: nr-operator-nr-operator-v2-leader-election-rolebinding
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: 'newrelic-operator-nr-operator-v2-leader-election-role'
+  name: 'nr-operator-nr-operator-v2-leader-election-role'
 subjects:
 - kind: ServiceAccount
-  name: 'newrelic-operator-nr-operator-v2-controller-manager'
+  name: 'nr-operator-nr-operator-v2-controller-manager'
   namespace: 'newrelic'
 ---
 # Source: nr-operator-v2/templates/metrics-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: newrelic-operator-nr-operator-v2-controller-manager-metrics-service
+  name: nr-operator-nr-operator-v2-controller-manager-metrics-service
   labels:
     control-plane: controller-manager
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -2447,7 +2447,7 @@ spec:
   selector:
     control-plane: controller-manager
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
   ports:
   - name: https
     port: 8443
@@ -2458,11 +2458,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: newrelic-operator-nr-operator-v2-webhook-service
+  name: nr-operator-nr-operator-v2-webhook-service
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -2470,7 +2470,7 @@ spec:
   selector:
     control-plane: controller-manager
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
   ports:
   - port: 443
     protocol: TCP
@@ -2480,12 +2480,12 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: newrelic-operator-nr-operator-v2-controller-manager
+  name: nr-operator-nr-operator-v2-controller-manager
   labels:
     control-plane: controller-manager
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -2494,13 +2494,13 @@ spec:
     matchLabels:
       control-plane: controller-manager
       app.kubernetes.io/name: nr-operator-v2
-      app.kubernetes.io/instance: newrelic-operator
+      app.kubernetes.io/instance: nr-operator
   template:
     metadata:
       labels:
         control-plane: controller-manager
         app.kubernetes.io/name: nr-operator-v2
-        app.kubernetes.io/instance: newrelic-operator
+        app.kubernetes.io/instance: nr-operator
       annotations:
         kubectl.kubernetes.io/default-container: manager
     spec:
@@ -2550,7 +2550,7 @@ spec:
           readOnly: true
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: newrelic-operator-nr-operator-v2-controller-manager
+      serviceAccountName: nr-operator-nr-operator-v2-controller-manager
       hostNetwork: false
       terminationGracePeriodSeconds: 10
       volumes:
@@ -2563,31 +2563,31 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: newrelic-operator-nr-operator-v2-serving-cert
+  name: nr-operator-nr-operator-v2-serving-cert
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   dnsNames:
-  - 'newrelic-operator-nr-operator-v2-webhook-service.newrelic.svc'
-  - 'newrelic-operator-nr-operator-v2-webhook-service.newrelic.svc.cluster.local'
+  - 'nr-operator-nr-operator-v2-webhook-service.newrelic.svc'
+  - 'nr-operator-nr-operator-v2-webhook-service.newrelic.svc.cluster.local'
   issuerRef:
     kind: Issuer
-    name: 'newrelic-operator-nr-operator-v2-selfsigned-issuer'
+    name: 'nr-operator-nr-operator-v2-selfsigned-issuer'
   secretName: webhook-server-cert
 ---
 # Source: nr-operator-v2/templates/selfsigned-issuer.yaml
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: newrelic-operator-nr-operator-v2-selfsigned-issuer
+  name: nr-operator-nr-operator-v2-selfsigned-issuer
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -2597,13 +2597,13 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: newrelic-operator-nr-operator-v2-mutating-webhook-configuration
+  name: nr-operator-nr-operator-v2-mutating-webhook-configuration
   annotations:
-    cert-manager.io/inject-ca-from: newrelic/newrelic-operator-nr-operator-v2-serving-cert
+    cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 webhooks:
@@ -2611,7 +2611,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-alertchannel
   failurePolicy: Fail
@@ -2631,7 +2631,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-alertdestination
   failurePolicy: Fail
@@ -2651,7 +2651,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-alertpolicy
   failurePolicy: Fail
@@ -2671,7 +2671,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-alertworkflow
   failurePolicy: Fail
@@ -2691,7 +2691,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-entitytagging
   failurePolicy: Fail
@@ -2711,7 +2711,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /mutate-alerts-k8s-newrelic-com-v1-nrqlcondition
   failurePolicy: Fail
@@ -2732,13 +2732,13 @@ webhooks:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: newrelic-operator-nr-operator-v2-validating-webhook-configuration
+  name: nr-operator-nr-operator-v2-validating-webhook-configuration
   annotations:
-    cert-manager.io/inject-ca-from: newrelic/newrelic-operator-nr-operator-v2-serving-cert
+    cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
     helm.sh/chart: nr-operator-v2-2.0.0
     app.kubernetes.io/name: nr-operator-v2
-    app.kubernetes.io/instance: newrelic-operator
+    app.kubernetes.io/instance: nr-operator
     app.kubernetes.io/version: "2.0.0"
     app.kubernetes.io/managed-by: Helm
 webhooks:
@@ -2746,7 +2746,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /validate-alerts-k8s-newrelic-com-v1-alertchannel
   failurePolicy: Fail
@@ -2766,7 +2766,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /validate-alerts-k8s-newrelic-com-v1-alertdestination
   failurePolicy: Fail
@@ -2786,7 +2786,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /validate-alerts-k8s-newrelic-com-v1-alertpolicy
   failurePolicy: Fail
@@ -2806,7 +2806,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /validate-alerts-k8s-newrelic-com-v1-alertworkflow
   failurePolicy: Fail
@@ -2826,7 +2826,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /validate-alerts-k8s-newrelic-com-v1-entitytagging
   failurePolicy: Fail
@@ -2846,7 +2846,7 @@ webhooks:
   - v1
   clientConfig:
     service:
-      name: 'newrelic-operator-nr-operator-v2-webhook-service'
+      name: 'nr-operator-nr-operator-v2-webhook-service'
       namespace: 'newrelic'
       path: /validate-alerts-k8s-newrelic-com-v1-nrqlcondition
   failurePolicy: Fail
