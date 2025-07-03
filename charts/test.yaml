@@ -2551,7 +2551,7 @@ spec:
       securityContext:
         runAsNonRoot: true
       serviceAccountName: newrelic-operator-nr-operator-v2-controller-manager
-      hostNetwork: 
+      hostNetwork: false
       terminationGracePeriodSeconds: 10
       volumes:
       - name: cert
