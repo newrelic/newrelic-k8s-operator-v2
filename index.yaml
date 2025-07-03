@@ -3,7 +3,17 @@ entries:
   nr-operator-v2:
   - apiVersion: v2
     appVersion: 2.0.0
-    created: "2025-06-27T11:00:30.694597-04:00"
+    created: "2025-07-03T13:04:04.049701-04:00"
+    description: A Helm chart for newrelic/newrelic-k8s-operator-v2
+    digest: 4f99e4c33a9d2e7b896e27a796a85db66fc09fb30842306ffd507338dce099fb
+    name: nr-operator-v2
+    type: application
+    urls:
+    - https://github.com/newrelic/newrelic-k8s-operator-v2/releases/download/v2.0.1/nr-operator-v2-2.0.1.tgz
+    version: 2.0.1
+  - apiVersion: v2
+    appVersion: 2.0.0
+    created: "2025-07-03T13:04:04.047521-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
     digest: 9b4dc640082a2f23d987f4fbfe23b3ad2d679505ddaf20e1bb724988c10e388f
     name: nr-operator-v2
@@ -13,7 +23,7 @@ entries:
     version: 2.0.0
   - apiVersion: v2
     appVersion: 1.6.2
-    created: "2025-06-27T11:00:30.692889-04:00"
+    created: "2025-07-03T13:04:04.045681-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
     digest: 26020c2223b9e24c64ece4997bc5cbb466ea940e18325d469fe4cf1c339e6880
     name: nr-operator-v2
@@ -23,7 +33,7 @@ entries:
     version: 1.6.2
   - apiVersion: v2
     appVersion: 1.6.1
-    created: "2025-06-27T11:00:30.691199-04:00"
+    created: "2025-07-03T13:04:04.043908-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
     digest: 4180df8a3fbd1d6d2449034a1b0270fa05ad7de12da7f9165d3ee4dc63c1726b
     name: nr-operator-v2
@@ -33,7 +43,7 @@ entries:
     version: 1.6.1
   - apiVersion: v2
     appVersion: 1.6.0
-    created: "2025-06-27T11:00:30.687296-04:00"
+    created: "2025-07-03T13:04:04.042108-04:00"
     description: A Helm chart for newrelic/newrelic-k8s-operator-v2
     digest: 2824cd889f50befa9fe548ec1ecc076fb0d64853a5e5d3da7f93823a397fa9f3
     name: nr-operator-v2
@@ -41,4 +51,4 @@ entries:
     urls:
     - https://github.com/newrelic/newrelic-k8s-operator-v2/releases/download/v1.6.0/nr-operator-v2-1.6.0.tgz
     version: 1.6.0
-generated: "2025-06-27T11:00:30.684219-04:00"
+generated: "2025-07-03T13:04:04.039726-04:00"
