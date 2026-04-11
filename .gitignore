@@ -27,3 +27,4 @@ go.work
 *~
 
 dist/
+/examples/tmp/

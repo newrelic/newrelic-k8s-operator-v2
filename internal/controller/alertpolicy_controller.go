@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -42,11 +43,66 @@ import (
 // AlertPolicyReconciler reconciles a AlertPolicy object
 type AlertPolicyReconciler struct {
 	client.Client
-	Scheme      *runtime.Scheme
-	Log         logr.Logger
-	Alerts      interfaces.NewRelicClientInterface
-	AlertClient func(string, string) (interfaces.NewRelicClientInterface, error)
-	apiKey      string
+	Scheme                    *runtime.Scheme
+	Log                       logr.Logger
+	Alerts                    interfaces.NewRelicClientInterface
+	AlertClient               func(string, string) (interfaces.NewRelicClientInterface, error)
+	searchNrqlConditionsFn    func(int, alerts.NrqlConditionsSearchCriteria) ([]*alerts.NrqlAlertCondition, error)
+	createStaticConditionFn   func(int, string, alerts.NrqlConditionCreateInput) (*alerts.NrqlAlertCondition, error)
+	createBaselineConditionFn func(int, string, alerts.NrqlConditionCreateInput) (*alerts.NrqlAlertCondition, error)
+	updateStaticConditionFn   func(int, string, alerts.NrqlConditionUpdateInput) (*alerts.NrqlAlertCondition, error)
+	updateBaselineConditionFn func(int, string, alerts.NrqlConditionUpdateInput) (*alerts.NrqlAlertCondition, error)
+	deleteConditionFn         func(int, string) error
+	apiKey                    string
+}
+
+func (r *AlertPolicyReconciler) searchNrqlConditions(accountID int, searchParams alerts.NrqlConditionsSearchCriteria) ([]*alerts.NrqlAlertCondition, error) {
+	if r.searchNrqlConditionsFn != nil {
+		return r.searchNrqlConditionsFn(accountID, searchParams)
+	}
+
+	return r.Alerts.Alerts().SearchNrqlConditionsQuery(accountID, searchParams)
+}
+
+func (r *AlertPolicyReconciler) createStaticCondition(accountID int, policyID string, createInput alerts.NrqlConditionCreateInput) (*alerts.NrqlAlertCondition, error) {
+	if r.createStaticConditionFn != nil {
+		return r.createStaticConditionFn(accountID, policyID, createInput)
+	}
+
+	return r.Alerts.Alerts().CreateNrqlConditionStaticMutation(accountID, policyID, createInput)
+}
+
+func (r *AlertPolicyReconciler) createBaselineCondition(accountID int, policyID string, createInput alerts.NrqlConditionCreateInput) (*alerts.NrqlAlertCondition, error) {
+	if r.createBaselineConditionFn != nil {
+		return r.createBaselineConditionFn(accountID, policyID, createInput)
+	}
+
+	return r.Alerts.Alerts().CreateNrqlConditionBaselineMutation(accountID, policyID, createInput)
+}
+
+func (r *AlertPolicyReconciler) updateStaticCondition(accountID int, conditionID string, updateInput alerts.NrqlConditionUpdateInput) (*alerts.NrqlAlertCondition, error) {
+	if r.updateStaticConditionFn != nil {
+		return r.updateStaticConditionFn(accountID, conditionID, updateInput)
+	}
+
+	return r.Alerts.Alerts().UpdateNrqlConditionStaticMutation(accountID, conditionID, updateInput)
+}
+
+func (r *AlertPolicyReconciler) updateBaselineCondition(accountID int, conditionID string, updateInput alerts.NrqlConditionUpdateInput) (*alerts.NrqlAlertCondition, error) {
+	if r.updateBaselineConditionFn != nil {
+		return r.updateBaselineConditionFn(accountID, conditionID, updateInput)
+	}
+
+	return r.Alerts.Alerts().UpdateNrqlConditionBaselineMutation(accountID, conditionID, updateInput)
+}
+
+func (r *AlertPolicyReconciler) deleteConditionByID(accountID int, conditionID string) error {
+	if r.deleteConditionFn != nil {
+		return r.deleteConditionFn(accountID, conditionID)
+	}
+
+	_, err := r.Alerts.Alerts().DeleteConditionMutation(accountID, conditionID)
+	return err
 }
 
 // +kubebuilder:rbac:groups=alerts.k8s.newrelic.com,resources=alertpolicies,verbs=get;list;watch;create;update;patch;delete
@@ -129,7 +185,7 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, nil
 	}
 
-	if reflect.DeepEqual(&policy.Spec, policy.Status.AppliedSpec) {
+	if r.matchesAppliedPolicyState(&policy) {
 		r.Log.Info("No updates to policy. skipping reconcile")
 		return ctrl.Result{}, nil
 	}
@@ -156,7 +212,7 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 				//Update Policy Status
 				r.Log.Info("Updating status...")
-				err = r.Status().Update(ctx, &policy)
+				err = r.updateStatusIfChanged(ctx, &policy)
 				if err != nil {
 					r.Log.Error(err, "failed to update AlertPolicy status")
 					return ctrl.Result{}, err
@@ -164,34 +220,33 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 			} else {
 				r.Log.Info("Policy unchanged, no update required")
-				if policy.Spec.Conditions != nil {
-					if len(policy.Spec.Conditions) > 0 {
-						r.Log.Info("Checking if conditions need to be updated...")
+				if shouldReconcileConditions(&policy) {
+					r.Log.Info("Checking if conditions need to be updated...")
 
-						if !r.haveConditionsChanged(&policy) {
-							r.Log.Info("Condition spec and status match - validating conditions exist in New Relic")
-							hasMismatch, err := r.conditionHasRemoteMismatch(&policy)
-							if err != nil {
-								return ctrl.Result{}, err
-							}
-							if !hasMismatch {
-								r.Log.Info("All applied conditions have associated conditions in New Relic. No condition updates to apply.")
-								return ctrl.Result{}, nil
-							} else {
-								r.Log.Info("One or more conditions were deleted in New Relic, but still exists in appliedStatus - attempting to recreate.")
-							}
-						} else {
-							r.Log.Info("Condition spec and status mismatch - updating conditions...")
-						}
-						r.handleConditions(&policy)
+					needsConditionReconcile, err := r.needsConditionReconcile(&policy)
+					if err != nil {
+						r.Log.Error(err, "failed to evaluate AlertPolicy conditions")
+						return ctrl.Result{}, err
+					}
 
-						//Update Policy Status
-						r.Log.Info("Updating status...")
-						err = r.Status().Update(ctx, &policy)
-						if err != nil {
-							r.Log.Error(err, "failed to update AlertPolicy status")
-							return ctrl.Result{}, err
-						}
+					if !needsConditionReconcile {
+						r.Log.Info("Condition spec and remote state match - no condition updates to apply.")
+						return ctrl.Result{}, nil
+					}
+
+					r.Log.Info("Condition spec or remote state mismatch - updating conditions...")
+					err = r.handleConditions(&policy)
+					if err != nil {
+						r.Log.Error(err, "failed to reconcile AlertPolicy conditions")
+						return ctrl.Result{}, err
+					}
+
+					//Update Policy Status
+					r.Log.Info("Updating status...")
+					err = r.updateStatusIfChanged(ctx, &policy)
+					if err != nil {
+						r.Log.Error(err, "failed to update AlertPolicy status")
+						return ctrl.Result{}, err
 					}
 				}
 			}
@@ -205,7 +260,7 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 			//Update Policy Status
 			r.Log.Info("Updating status...")
-			err = r.Status().Update(ctx, &policy)
+			err = r.updateStatusIfChanged(ctx, &policy)
 			if err != nil {
 				r.Log.Error(err, "failed to update AlertPolicy status")
 				return ctrl.Result{}, err
@@ -213,8 +268,13 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	} else {
 		//new policy name doesn't exist - check if configured name matches previous configured name - if no, update policy with new configured name
-		if policy.Status.PolicyID != 0 && policy.Status.AppliedSpec.Name != policy.Spec.Name {
-			r.Log.Info("Updating previously configured policy", "policy", policy.Status.AppliedSpec.Name)
+		appliedPolicyName := ""
+		if policy.Status.AppliedSpec != nil {
+			appliedPolicyName = policy.Status.AppliedSpec.Name
+		}
+
+		if policy.Status.PolicyID != 0 && appliedPolicyName != policy.Spec.Name {
+			r.Log.Info("Updating previously configured policy", "policy", appliedPolicyName)
 			err = r.updatePolicy(policy.Status.PolicyID, &policy)
 			if err != nil {
 				r.Log.Error(err, "failed to update New Relic alert policy")
@@ -224,7 +284,7 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 			//Update Policy Status
 			r.Log.Info("Updating status...")
-			err = r.Status().Update(ctx, &policy)
+			err = r.updateStatusIfChanged(ctx, &policy)
 			if err != nil {
 				r.Log.Error(err, "failed to update AlertPolicy status")
 				return ctrl.Result{}, err
@@ -239,20 +299,13 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 			//Update Policy Status
 			r.Log.Info("Updating status...")
-			err = r.Status().Update(ctx, &policy)
+			err = r.updateStatusIfChanged(ctx, &policy)
 			if err != nil {
 				r.Log.Error(err, "failed to update AlertPolicy status")
 				return ctrl.Result{}, err
 			}
 
 		}
-	}
-
-	//Update Policy Status
-	err = r.Status().Update(ctx, &policy)
-	if err != nil {
-		r.Log.Error(err, "failed to update AlertPolicy status")
-		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -346,16 +399,22 @@ func (r *AlertPolicyReconciler) updatePolicy(policyID int, policy *alertsv1.Aler
 
 	policy.Status.PolicyID = updatedPolicy.ID
 
-	if policy.Spec.Conditions != nil {
-		if len(policy.Spec.Conditions) > 0 {
-			r.Log.Info("Checking if conditions need to be updated...")
+	if shouldReconcileConditions(policy) {
+		r.Log.Info("Checking if conditions need to be updated...")
 
-			if !r.haveConditionsChanged(policy) {
-				r.Log.Info("Conditions unchanged - skipping handle")
-				return nil
-			}
+		needsConditionReconcile, err := r.needsConditionReconcile(policy)
+		if err != nil {
+			return err
+		}
 
-			r.handleConditions(policy)
+		if !needsConditionReconcile {
+			r.Log.Info("Conditions unchanged - skipping handle")
+			return nil
+		}
+
+		err = r.handleConditions(policy)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -419,14 +478,12 @@ func (r *AlertPolicyReconciler) getExistingPolicyByName(policy *alertsv1.AlertPo
 			}
 		}
 
+		if existingPol == nil {
+			return nil, nil
+		}
+
 		policy.Status.PolicyID = existingPol.ID
-		policy.Status.AppliedSpec = &alertsv1.AlertPolicySpec{}
-		policy.Status.AppliedSpec.Name = existingPol.Name
-		policy.Status.AppliedSpec.IncidentPreference = string(existingPol.IncidentPreference)
-		policy.Status.AppliedSpec.Region = policy.Spec.Region
-		policy.Status.AppliedSpec.AccountID = policy.Spec.AccountID
-		policy.Status.AppliedSpec.APIKey = policy.Spec.APIKey
-		policy.Status.AppliedSpec.APIKeySecret = policy.Spec.APIKeySecret
+		policy.Status.AppliedSpec = buildAppliedPolicySpec(policy, existingPol)
 
 		return existingPol, nil
 	}
@@ -434,10 +491,107 @@ func (r *AlertPolicyReconciler) getExistingPolicyByName(policy *alertsv1.AlertPo
 	return nil, nil
 }
 
+func snapshotAlertPolicySpec(spec alertsv1.AlertPolicySpec) *alertsv1.AlertPolicySpec {
+	cloned := spec.DeepCopy()
+	if cloned == nil {
+		return &alertsv1.AlertPolicySpec{}
+	}
+
+	return cloned
+}
+
+func buildAppliedPolicySpec(policy *alertsv1.AlertPolicy, existingPolicy *alerts.Policy) *alertsv1.AlertPolicySpec {
+	appliedSpec := &alertsv1.AlertPolicySpec{}
+	if policy.Status.AppliedSpec != nil && policy.Status.AppliedSpec.Conditions != nil {
+		appliedSpec.Conditions = append([]alertsv1.PolicyCondition(nil), policy.Status.AppliedSpec.Conditions...)
+	}
+
+	appliedSpec.Name = existingPolicy.Name
+	appliedSpec.IncidentPreference = string(existingPolicy.IncidentPreference)
+	appliedSpec.Region = policy.Spec.Region
+	appliedSpec.AccountID = policy.Spec.AccountID
+	appliedSpec.APIKey = policy.Spec.APIKey
+	appliedSpec.APIKeySecret = policy.Spec.APIKeySecret
+
+	return appliedSpec
+}
+
+func findAppliedConditionIndex(conditions []alertsv1.PolicyCondition, conditionName string) int {
+	for index, condition := range conditions {
+		if conditionIdentity(condition) == conditionName {
+			return index
+		}
+	}
+
+	return -1
+}
+
+func conditionIdentity(condition alertsv1.PolicyCondition) string {
+	if condition.Name != "" {
+		return condition.Name
+	}
+
+	return condition.Spec.Name
+}
+
+func shouldReconcileConditions(policy *alertsv1.AlertPolicy) bool {
+	if len(policy.Spec.Conditions) > 0 {
+		return true
+	}
+
+	return policy.Status.AppliedSpec != nil && len(policy.Status.AppliedSpec.Conditions) > 0
+}
+
+func (r *AlertPolicyReconciler) needsConditionReconcile(policy *alertsv1.AlertPolicy) (bool, error) {
+	if r.haveConditionsChanged(policy) {
+		return true, nil
+	}
+
+	if len(policy.Spec.Conditions) == 0 {
+		return false, nil
+	}
+
+	remoteConditionsByName, err := r.getExistingNrqlConditionsByName(policy)
+	if err != nil {
+		return false, err
+	}
+
+	for _, configuredCondition := range policy.Spec.Conditions {
+		conditionName := conditionIdentity(configuredCondition)
+		remoteCondition, ok := remoteConditionsByName[conditionName]
+		if !ok || !r.matchesRemoteConditionSpec(remoteCondition, &configuredCondition) {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (r *AlertPolicyReconciler) matchesAppliedPolicyState(policy *alertsv1.AlertPolicy) bool {
+	if policy.Status.PolicyID == 0 || policy.Status.AppliedSpec == nil {
+		return false
+	}
+
+	appliedSpec := policy.Status.AppliedSpec
+	if policy.Spec.Name != appliedSpec.Name ||
+		policy.Spec.IncidentPreference != appliedSpec.IncidentPreference ||
+		policy.Spec.Region != appliedSpec.Region ||
+		policy.Spec.AccountID != appliedSpec.AccountID ||
+		policy.Spec.APIKey != appliedSpec.APIKey ||
+		policy.Spec.APIKeySecret != appliedSpec.APIKeySecret {
+		return false
+	}
+
+	return !r.haveConditionsChanged(policy)
+}
+
 // haveConditionsChanged validates if condition spec and appliedStatus differ
 func (r *AlertPolicyReconciler) haveConditionsChanged(policy *alertsv1.AlertPolicy) bool {
 	configuredConditions := policy.Spec.Conditions
-	observedConditions := policy.Status.AppliedSpec.Conditions
+	observedConditions := []alertsv1.PolicyCondition{}
+	if policy.Status.AppliedSpec != nil {
+		observedConditions = policy.Status.AppliedSpec.Conditions
+	}
 
 	if len(configuredConditions) != len(observedConditions) {
 		return true
@@ -450,25 +604,6 @@ func (r *AlertPolicyReconciler) haveConditionsChanged(policy *alertsv1.AlertPoli
 	}
 
 	return false
-}
-
-// conditionHasRemoteMismatch fetches conditions from existing policy and determines if condition in appliedSpec has been deleted in New Relic
-func (r *AlertPolicyReconciler) conditionHasRemoteMismatch(policy *alertsv1.AlertPolicy) (bool, error) {
-	observedConditions := policy.Status.AppliedSpec.Conditions
-
-	for _, observedCondition := range observedConditions {
-		existingCondition, err := r.getExistingNrqlCondition(&observedCondition, policy)
-		if err != nil {
-			r.Log.Error(err, "failed to fetch existing condition")
-			return false, err
-		}
-
-		if existingCondition == nil { // condition deleted on the NR side, so return true to path into handleConditions to recreate it
-			return true, nil
-		} //TODO: add logic to compare retrieved condition spec against appliedStatus spec
-	}
-
-	return false, nil
 }
 
 // hasPolicyChanged checks if existing policy and policy spec differ
@@ -487,14 +622,18 @@ type processedAlertConditions struct {
 
 // handleConditions manages the creation, update, and delete of nrql conditions
 func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) error {
+	observedConditions := []alertsv1.PolicyCondition{}
+	if policy.Status.AppliedSpec != nil {
+		observedConditions = policy.Status.AppliedSpec.Conditions
+	}
 
 	//build struct of existing conditions to mark as processed/eligible for deletion (if not processed)
 	processedConditions := []processedAlertConditions{}
-	for _, existing := range policy.Status.AppliedSpec.Conditions {
+	for _, existing := range observedConditions {
 		processedConditions = append(processedConditions, processedAlertConditions{
 			accountId: policy.Spec.AccountID,
 			id:        existing.ID,
-			name:      existing.Name,
+			name:      conditionIdentity(existing),
 			processed: false,
 		})
 	}
@@ -508,27 +647,50 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 		}
 
 		if existingCondition != nil { // if condition exists in NR already by name
-			for _, observedCondition := range policy.Status.AppliedSpec.Conditions {
-				if observedCondition.Name == configuredCondition.Spec.Name { // if condition exists in both spec/current state
-					configuredCondition.Name = existingCondition.Name
-					configuredCondition.ID = existingCondition.ID
-					processedConditions[i].processed = true
+			configuredCondition.Name = existingCondition.Name
+			configuredCondition.ID = existingCondition.ID
 
-					if !reflect.DeepEqual(configuredCondition.Spec, observedCondition.Spec) { //compare spec/status state to determine if config mismatch
-						r.Log.Info("Configuration difference detected. Updating condition to current spec specified.")
-						updatedCondition, err := r.updateCondition(&configuredCondition, policy)
-						if err != nil {
-							return err
-						}
-						policy.Spec.Conditions[i] = *updatedCondition //apply latest configuration to spec
+			observedIndex := findAppliedConditionIndex(observedConditions, configuredCondition.Spec.Name)
+			if observedIndex >= 0 {
+				processedConditions[observedIndex].processed = true
+
+				if !reflect.DeepEqual(configuredCondition.Spec, observedConditions[observedIndex].Spec) { //compare spec/status state to determine if config mismatch
+					r.Log.Info("Configuration difference detected. Updating condition to current spec specified.")
+					updatedCondition, err := r.updateCondition(&configuredCondition, policy)
+					if err != nil {
+						return err
 					}
+					policy.Spec.Conditions[i] = *updatedCondition //apply latest configuration to spec
+				} else {
+					policy.Spec.Conditions[i] = configuredCondition
 				}
+				continue
 			}
+
+			if r.matchesRemoteConditionSpec(existingCondition, &configuredCondition) {
+				r.Log.Info("Condition exists in New Relic and already matches desired spec. Restoring applied status.")
+				policy.Spec.Conditions[i] = configuredCondition
+				continue
+			}
+
+			r.Log.Info("Condition exists in New Relic but not in applied status. Reconciling condition to current spec.")
+			updatedCondition, err := r.updateCondition(&configuredCondition, policy)
+			if err != nil {
+				return err
+			}
+			policy.Spec.Conditions[i] = *updatedCondition
+			continue
 		} else { //configured condition name does not exist in NR already, create it
 			createdCondition, err := r.createCondition(&configuredCondition, policy)
 			if err != nil {
 				return err
 			}
+
+			observedIndex := findAppliedConditionIndex(observedConditions, configuredCondition.Spec.Name)
+			if observedIndex >= 0 {
+				processedConditions[observedIndex].processed = true
+			}
+
 			configuredCondition.Name = createdCondition.Name
 			configuredCondition.ID = createdCondition.ID
 			policy.Spec.Conditions[i] = *createdCondition
@@ -537,8 +699,19 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 
 	r.Log.Info("Checking if any conditions need to be deleted")
 	if len(processedConditions) > 0 {
+		remoteConditionsByName, err := r.getExistingNrqlConditionsByName(policy)
+		if err != nil {
+			return err
+		}
+
 		for _, pc := range processedConditions {
 			if !pc.processed {
+				if pc.id == "" {
+					if existingCondition, ok := remoteConditionsByName[pc.name]; ok {
+						pc.id = existingCondition.ID
+					}
+				}
+
 				r.Log.Info("deleting condition", "condName", pc.name)
 				err := r.deleteCondition(pc)
 				if err != nil {
@@ -548,9 +721,127 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 		}
 	}
 
-	policy.Status.AppliedSpec = &policy.Spec //apply latest spec to status
+	policy.Status.AppliedSpec = snapshotAlertPolicySpec(policy.Spec) //apply latest spec to status
 
 	return nil
+}
+
+func (r *AlertPolicyReconciler) getExistingNrqlConditionsByName(policy *alertsv1.AlertPolicy) (map[string]*alerts.NrqlAlertCondition, error) {
+	polString := fmt.Sprint(policy.Status.PolicyID)
+	searchParams := alerts.NrqlConditionsSearchCriteria{
+		PolicyID: polString,
+	}
+
+	existingConditions, err := r.searchNrqlConditions(policy.Spec.AccountID, searchParams)
+	if err != nil {
+		r.Log.Error(err, "failed to fetch conditions",
+			"policyID", polString,
+			"apiKey", interfaces.PartialAPIKey(r.apiKey),
+		)
+		return nil, err
+	}
+
+	conditionsByName := make(map[string]*alerts.NrqlAlertCondition, len(existingConditions))
+	for _, existingCondition := range existingConditions {
+		if existingCondition == nil || existingCondition.Name == "" {
+			continue
+		}
+
+		conditionsByName[existingCondition.Name] = existingCondition
+	}
+
+	return conditionsByName, nil
+}
+
+func (r *AlertPolicyReconciler) matchesRemoteConditionSpec(existingCondition *alerts.NrqlAlertCondition, desiredCondition *alertsv1.PolicyCondition) bool {
+	if existingCondition == nil {
+		return false
+	}
+
+	return reflect.DeepEqual(desiredCondition.Spec, buildPolicyConditionSpecFromRemote(existingCondition))
+}
+
+func buildPolicyConditionSpecFromRemote(existingCondition *alerts.NrqlAlertCondition) alertsv1.PolicyConditionSpec {
+	remoteSpec := alertsv1.PolicyConditionSpec{
+		NrqlConditionSpec: alertsv1.NrqlConditionSpec{
+			AlertsNrqlBaseSpec: alertsv1.AlertsNrqlBaseSpec{
+				Description: existingCondition.Description,
+				Enabled:     existingCondition.Enabled,
+				Name:        existingCondition.Name,
+				Nrql: alertsv1.NrqlConditionCreateQuery{
+					Query:            existingCondition.Nrql.Query,
+					DataAccountID:    existingCondition.Nrql.DataAccountId,
+					EvaluationOffset: existingCondition.Nrql.EvaluationOffset,
+				},
+				RunbookURL:                existingCondition.RunbookURL,
+				Type:                      existingCondition.Type,
+				ViolationTimeLimit:        existingCondition.ViolationTimeLimit,
+				ViolationTimeLimitSeconds: existingCondition.ViolationTimeLimitSeconds,
+				TitleTemplate:             existingCondition.TitleTemplate,
+			},
+			AlertsBaselineSpecificSpec: alertsv1.AlertsBaselineSpecificSpec{
+				BaselineDirection: existingCondition.BaselineDirection,
+			},
+		},
+	}
+
+	if existingCondition.Expiration != nil {
+		remoteSpec.Expiration = &alertsv1.AlertsNrqlConditionExpiration{
+			ExpirationDuration:          existingCondition.Expiration.ExpirationDuration,
+			CloseViolationsOnExpiration: existingCondition.Expiration.CloseViolationsOnExpiration,
+			OpenViolationOnExpiration:   existingCondition.Expiration.OpenViolationOnExpiration,
+			IgnoreOnExpectedTermination: existingCondition.Expiration.IgnoreOnExpectedTermination,
+		}
+	}
+
+	if existingCondition.Signal != nil {
+		remoteSpec.Signal = &alertsv1.AlertsNrqlConditionSignal{
+			AggregationWindow: existingCondition.Signal.AggregationWindow,
+			EvaluationOffset:  existingCondition.Signal.EvaluationOffset,
+			EvaluationDelay:   existingCondition.Signal.EvaluationDelay,
+			FillOption:        existingCondition.Signal.FillOption,
+			FillValue:         existingCondition.Signal.FillValue,
+			AggregationMethod: existingCondition.Signal.AggregationMethod,
+			AggregationDelay:  existingCondition.Signal.AggregationDelay,
+			AggregationTimer:  existingCondition.Signal.AggregationTimer,
+			SlideBy:           existingCondition.Signal.SlideBy,
+		}
+	}
+
+	for _, term := range existingCondition.Terms {
+		threshold := ""
+		if term.Threshold != nil {
+			threshold = strconv.FormatFloat(*term.Threshold, 'f', -1, 64)
+		}
+
+		remoteSpec.Terms = append(remoteSpec.Terms, alertsv1.AlertsNrqlConditionTerm{
+			Operator:             term.Operator,
+			Priority:             term.Priority,
+			Threshold:            threshold,
+			ThresholdDuration:    term.ThresholdDuration,
+			ThresholdOccurrences: term.ThresholdOccurrences,
+		})
+	}
+
+	return remoteSpec
+}
+
+func (r *AlertPolicyReconciler) updateStatusIfChanged(ctx context.Context, policy *alertsv1.AlertPolicy) error {
+	key := types.NamespacedName{Namespace: policy.Namespace, Name: policy.Name}
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var current alertsv1.AlertPolicy
+		if err := r.Get(ctx, key, &current); err != nil {
+			return err
+		}
+
+		if reflect.DeepEqual(current.Status, policy.Status) {
+			return nil
+		}
+
+		current.Status = policy.Status
+		return r.Status().Update(ctx, &current)
+	})
 }
 
 // createCondition creates a new condition under an existing policy
@@ -565,10 +856,10 @@ func (r *AlertPolicyReconciler) createCondition(condition *alertsv1.PolicyCondit
 	polString := fmt.Sprint(policy.Status.PolicyID)
 
 	if condition.Spec.Type == "STATIC" { //golint:nolint
-		createdCondition, err = r.Alerts.Alerts().CreateNrqlConditionStaticMutation(policy.Spec.AccountID, polString, createInput)
+		createdCondition, err = r.createStaticCondition(policy.Spec.AccountID, polString, createInput)
 	} else { //baseline
 		if condition.Spec.BaselineDirection != nil {
-			createdCondition, err = r.Alerts.Alerts().CreateNrqlConditionBaselineMutation(policy.Spec.AccountID, polString, createInput)
+			createdCondition, err = r.createBaselineCondition(policy.Spec.AccountID, polString, createInput)
 		}
 	}
 
@@ -601,10 +892,10 @@ func (r *AlertPolicyReconciler) updateCondition(condition *alertsv1.PolicyCondit
 	var err error
 
 	if condition.Spec.Type == "STATIC" { //golint:nolint
-		updatedCondition, err = r.Alerts.Alerts().UpdateNrqlConditionStaticMutation(policy.Spec.AccountID, condition.ID, updateInput)
+		updatedCondition, err = r.updateStaticCondition(policy.Spec.AccountID, condition.ID, updateInput)
 	} else { //baseline
 		if condition.Spec.BaselineDirection != nil {
-			updatedCondition, err = r.Alerts.Alerts().UpdateNrqlConditionBaselineMutation(policy.Spec.AccountID, condition.ID, updateInput)
+			updatedCondition, err = r.updateBaselineCondition(policy.Spec.AccountID, condition.ID, updateInput)
 		} else {
 			r.Log.Info("Missing baseline direction configuration, review config")
 		}
@@ -630,7 +921,7 @@ func (r *AlertPolicyReconciler) updateCondition(condition *alertsv1.PolicyCondit
 // deleteCondition deletes a single condition
 func (r *AlertPolicyReconciler) deleteCondition(condition processedAlertConditions) error {
 	r.Log.Info("Deleting condition", "condition", condition)
-	_, err := r.Alerts.Alerts().DeleteConditionMutation(condition.accountId, condition.id)
+	err := r.deleteConditionByID(condition.accountId, condition.id)
 	if err != nil {
 		return err
 	}
@@ -649,7 +940,7 @@ func (r *AlertPolicyReconciler) getExistingNrqlCondition(currentCondition *alert
 		PolicyID: polString,
 	}
 
-	existingConditions, err := r.Alerts.Alerts().SearchNrqlConditionsQuery(policy.Spec.AccountID, searchParams)
+	existingConditions, err := r.searchNrqlConditions(policy.Spec.AccountID, searchParams)
 	if err != nil {
 		r.Log.Error(err, "failed to fetch condition",
 			"policyID", currentCondition.Spec.ExistingPolicyID,

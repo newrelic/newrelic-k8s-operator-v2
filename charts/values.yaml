@@ -24,7 +24,10 @@ controllerManager:
     runAsNonRoot: true
   replicas: 1
   serviceAccount:
+    create: true
+    automount: true
     annotations: {}
+    name: ""
   affinity: {}
   tolerations: []
   nodeSelector: {}
