@@ -55,7 +55,7 @@ spec:
           readOnly: true
       securityContext: {{- toYaml .Values.controllerManager.podSecurityContext | nindent
         8 }}
-      serviceAccountName: {{ include "chart.fullname" . }}-controller-manager
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
       hostNetwork: {{ .Values.hostNetwork }}
       terminationGracePeriodSeconds: 10
       volumes:

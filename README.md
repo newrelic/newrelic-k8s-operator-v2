@@ -171,7 +171,7 @@ This process can be repeated for any of the examples provided. For more detail o
 # Development
 
 ## Prerequisites
-- [Go](https://golang.org/) v1.22.0+
+- [Go](https://golang.org/) v1.26.2+
 - [Docker](https://www.docker.com/get-started) (with Kubernetes enabled)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [kustomize](https://kustomize.io/)

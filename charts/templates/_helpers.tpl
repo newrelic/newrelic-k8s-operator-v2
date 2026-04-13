@@ -54,9 +54,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "chart.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "chart.fullname" .) .Values.serviceAccount.name }}
+{{- $default := printf "%s-controller-manager" (include "chart.fullname" .) }}
+{{- $serviceAccount := .Values.controllerManager.serviceAccount | default dict }}
+{{- if (default true $serviceAccount.create) }}
+{{- default $default $serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" $serviceAccount.name }}
 {{- end }}
 {{- end }}
