@@ -28,3 +28,8 @@ go.work
 
 dist/
 /examples/tmp/
+
+CLAUDE.md
+.claude/
+.codegraph/
+
