@@ -82,11 +82,12 @@ type AlertsNrqlConditionExpiration struct {
 
 // AlertsNrqlConditionTerm represents the terms of a New Relic alert condition.
 type AlertsNrqlConditionTerm struct {
-	Operator             alerts.AlertsNRQLConditionTermsOperator `json:"operator,omitempty"`
-	Priority             alerts.NrqlConditionPriority            `json:"priority,omitempty"`
-	Threshold            string                                  `json:"threshold,omitempty"`
-	ThresholdDuration    int                                     `json:"thresholdDuration,omitempty"`
-	ThresholdOccurrences alerts.ThresholdOccurrence              `json:"thresholdOccurrences,omitempty"`
+	Operator                     alerts.AlertsNRQLConditionTermsOperator `json:"operator,omitempty"`
+	Priority                     alerts.NrqlConditionPriority            `json:"priority,omitempty"`
+	Threshold                    string                                  `json:"threshold,omitempty"`
+	ThresholdDuration            int                                     `json:"thresholdDuration,omitempty"`
+	ThresholdOccurrences         alerts.ThresholdOccurrence              `json:"thresholdOccurrences,omitempty"`
+	DisableHealthStatusReporting *bool                                   `json:"disableHealthStatusReporting,omitempty"`
 }
 
 // AlertsBaselineSpecificSpec - Settings for the direction of anomaly type alerts
