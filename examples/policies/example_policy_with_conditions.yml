@@ -59,6 +59,7 @@ spec:
             thresholdDuration: 60
             priority: CRITICAL
             operator: BELOW
+            disableHealthStatusReporting: false
         expiration:
           expirationDuration: 360
           closeViolationsOnExpiration: true
