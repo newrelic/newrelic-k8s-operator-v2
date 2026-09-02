@@ -155,6 +155,8 @@ spec:
                             description: AlertsNrqlConditionTerm represents the terms
                               of a New Relic alert condition.
                             properties:
+                              disableHealthStatusReporting:
+                                type: boolean
                               operator:
                                 description: AlertsNRQLConditionTermsOperator - Operator
                                   used to compare against the threshold for NrqlConditions.
@@ -326,6 +328,8 @@ spec:
                                 description: AlertsNrqlConditionTerm represents the
                                   terms of a New Relic alert condition.
                                 properties:
+                                  disableHealthStatusReporting:
+                                    type: boolean
                                   operator:
                                     description: AlertsNRQLConditionTermsOperator
                                       - Operator used to compare against the threshold

@@ -395,6 +395,7 @@ func (r *NrqlConditionReconciler) translateNrqlUpdateInput(cond *alertsv1.NrqlCo
 		t.Threshold = &f
 		t.ThresholdDuration = term.ThresholdDuration
 		t.ThresholdOccurrences = term.ThresholdOccurrences
+		t.DisableHealthStatusReporting = term.DisableHealthStatusReporting
 
 		conditionInput.Terms = append(conditionInput.Terms, t)
 	}
@@ -458,6 +459,7 @@ func (r *NrqlConditionReconciler) translateNrqlCreateInput(cond *alertsv1.NrqlCo
 		t.Threshold = &f
 		t.ThresholdDuration = term.ThresholdDuration
 		t.ThresholdOccurrences = term.ThresholdOccurrences
+		t.DisableHealthStatusReporting = term.DisableHealthStatusReporting
 
 		conditionInput.Terms = append(conditionInput.Terms, t)
 	}
