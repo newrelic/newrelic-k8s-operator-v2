@@ -18,7 +18,7 @@ kind: CustomResourceDefinition
 metadata:
   name: alertchannels.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'default/nr-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
@@ -198,7 +198,7 @@ kind: CustomResourceDefinition
 metadata:
   name: alertdestinations.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'default/nr-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
@@ -589,7 +589,7 @@ kind: CustomResourceDefinition
 metadata:
   name: alertpolicies.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'default/nr-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
@@ -992,7 +992,7 @@ kind: CustomResourceDefinition
 metadata:
   name: alertworkflows.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'default/nr-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
@@ -1402,7 +1402,7 @@ kind: CustomResourceDefinition
 metadata:
   name: entitytaggings.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'default/nr-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
@@ -1563,7 +1563,7 @@ kind: CustomResourceDefinition
 metadata:
   name: nrqlconditions.alerts.k8s.newrelic.com
   annotations:
-    cert-manager.io/inject-ca-from: 'default/nr-operator-nr-operator-v2-serving-cert'
+    cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
@@ -2572,7 +2572,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: nr-operator-nr-operator-v2-mutating-webhook-configuration
   annotations:
-    cert-manager.io/inject-ca-from: default/nr-operator-nr-operator-v2-serving-cert
+    cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
@@ -2707,7 +2707,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: nr-operator-nr-operator-v2-validating-webhook-configuration
   annotations:
-    cert-manager.io/inject-ca-from: default/nr-operator-nr-operator-v2-serving-cert
+    cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
     helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
