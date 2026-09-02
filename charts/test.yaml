@@ -5,10 +5,10 @@ kind: ServiceAccount
 metadata:
   name: nr-operator-nr-operator-v2-controller-manager
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 automountServiceAccountToken: true
 ---
@@ -21,10 +21,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -201,10 +201,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -592,10 +592,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -746,6 +746,8 @@ spec:
                             description: AlertsNrqlConditionTerm represents the terms
                               of a New Relic alert condition.
                             properties:
+                              disableHealthStatusReporting:
+                                type: boolean
                               operator:
                                 description: AlertsNRQLConditionTermsOperator - Operator
                                   used to compare against the threshold for NrqlConditions.
@@ -916,6 +918,8 @@ spec:
                                 description: AlertsNrqlConditionTerm represents the
                                   terms of a New Relic alert condition.
                                 properties:
+                                  disableHealthStatusReporting:
+                                    type: boolean
                                   operator:
                                     description: AlertsNRQLConditionTermsOperator -
                                       Operator used to compare against the threshold
@@ -991,10 +995,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -1401,10 +1405,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -1562,10 +1566,10 @@ metadata:
     cert-manager.io/inject-ca-from: 'newrelic/nr-operator-nr-operator-v2-serving-cert'
     controller-gen.kubebuilder.io/version: v0.16.5
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   group: alerts.k8s.newrelic.com
@@ -1692,6 +1696,8 @@ spec:
                   description: AlertsNrqlConditionTerm represents the terms of a New
                     Relic alert condition.
                   properties:
+                    disableHealthStatusReporting:
+                      type: boolean
                     operator:
                       description: AlertsNRQLConditionTermsOperator - Operator used
                         to compare against the threshold for NrqlConditions.
@@ -1815,6 +1821,8 @@ spec:
                       description: AlertsNrqlConditionTerm represents the terms of a
                         New Relic alert condition.
                       properties:
+                        disableHealthStatusReporting:
+                          type: boolean
                         operator:
                           description: AlertsNRQLConditionTermsOperator - Operator used
                             to compare against the threshold for NrqlConditions.
@@ -1870,10 +1878,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertchannel-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1901,10 +1909,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertchannel-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1928,10 +1936,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertdestination-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1959,10 +1967,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertdestination-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -1986,10 +1994,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertpolicy-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2017,10 +2025,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertpolicy-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2044,10 +2052,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertworkflow-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2075,10 +2083,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-alertworkflow-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2102,10 +2110,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-entitytagging-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2133,10 +2141,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-entitytagging-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2160,10 +2168,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-manager-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2231,10 +2239,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-metrics-auth-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2256,10 +2264,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-metrics-reader
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - nonResourceURLs:
@@ -2273,10 +2281,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-nrqlcondition-editor-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2304,10 +2312,10 @@ kind: ClusterRole
 metadata:
   name: nr-operator-nr-operator-v2-nrqlcondition-viewer-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2331,10 +2339,10 @@ kind: ClusterRoleBinding
 metadata:
   name: nr-operator-nr-operator-v2-manager-rolebinding
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2351,10 +2359,10 @@ kind: ClusterRoleBinding
 metadata:
   name: nr-operator-nr-operator-v2-metrics-auth-rolebinding
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2371,10 +2379,10 @@ kind: Role
 metadata:
   name: nr-operator-nr-operator-v2-leader-election-role
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -2415,10 +2423,10 @@ kind: RoleBinding
 metadata:
   name: nr-operator-nr-operator-v2-leader-election-rolebinding
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -2436,10 +2444,10 @@ metadata:
   name: nr-operator-nr-operator-v2-controller-manager-metrics-service
   labels:
     control-plane: controller-manager
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -2459,10 +2467,10 @@ kind: Service
 metadata:
   name: nr-operator-nr-operator-v2-webhook-service
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -2482,10 +2490,10 @@ metadata:
   name: nr-operator-nr-operator-v2-controller-manager
   labels:
     control-plane: controller-manager
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -2566,10 +2574,10 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 webhooks:
 - admissionReviewVersions:
@@ -2701,10 +2709,10 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: newrelic/nr-operator-nr-operator-v2-serving-cert
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 webhooks:
 - admissionReviewVersions:
@@ -2834,10 +2842,10 @@ kind: Certificate
 metadata:
   name: nr-operator-nr-operator-v2-serving-cert
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   dnsNames:
@@ -2854,10 +2862,10 @@ kind: Issuer
 metadata:
   name: nr-operator-nr-operator-v2-selfsigned-issuer
   labels:
-    helm.sh/chart: nr-operator-v2-2.1.0
+    helm.sh/chart: nr-operator-v2-2.2.0
     app.kubernetes.io/name: nr-operator-v2
     app.kubernetes.io/instance: nr-operator
-    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/version: "2.2.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   selfSigned: {}
