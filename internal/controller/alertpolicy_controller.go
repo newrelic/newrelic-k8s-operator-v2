@@ -815,11 +815,12 @@ func buildPolicyConditionSpecFromRemote(existingCondition *alerts.NrqlAlertCondi
 		}
 
 		remoteSpec.Terms = append(remoteSpec.Terms, alertsv1.AlertsNrqlConditionTerm{
-			Operator:             term.Operator,
-			Priority:             term.Priority,
-			Threshold:            threshold,
-			ThresholdDuration:    term.ThresholdDuration,
-			ThresholdOccurrences: term.ThresholdOccurrences,
+			Operator:                     term.Operator,
+			Priority:                     term.Priority,
+			Threshold:                    threshold,
+			ThresholdDuration:            term.ThresholdDuration,
+			ThresholdOccurrences:         term.ThresholdOccurrences,
+			DisableHealthStatusReporting: term.DisableHealthStatusReporting,
 		})
 	}
 
@@ -1022,6 +1023,7 @@ func (r *AlertPolicyReconciler) fetchNrqlUpdateInput(cond *alertsv1.PolicyCondit
 		t.Threshold = &f
 		t.ThresholdDuration = term.ThresholdDuration
 		t.ThresholdOccurrences = term.ThresholdOccurrences
+		t.DisableHealthStatusReporting = term.DisableHealthStatusReporting
 
 		conditionInput.Terms = append(conditionInput.Terms, t)
 	}
@@ -1085,6 +1087,7 @@ func (r *AlertPolicyReconciler) fetchNrqlCreateInput(cond *alertsv1.PolicyCondit
 		t.Threshold = &f
 		t.ThresholdDuration = term.ThresholdDuration
 		t.ThresholdOccurrences = term.ThresholdOccurrences
+		t.DisableHealthStatusReporting = term.DisableHealthStatusReporting
 
 		conditionInput.Terms = append(conditionInput.Terms, t)
 	}
