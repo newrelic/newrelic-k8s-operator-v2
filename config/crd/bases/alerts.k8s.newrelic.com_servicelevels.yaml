@@ -1,0 +1,397 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: servicelevels.alerts.k8s.newrelic.com
+spec:
+  group: alerts.k8s.newrelic.com
+  names:
+    kind: ServiceLevel
+    listKind: ServiceLevelList
+    plural: servicelevels
+    singular: servicelevel
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.created
+      name: Created
+      type: boolean
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: ServiceLevel is the Schema for the servicelevels API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ServiceLevelSpec defines the desired state of ServiceLevel
+            properties:
+              accountId:
+                type: integer
+              apiKey:
+                type: string
+              apiKeySecret:
+                description: NewRelicSecret masks sensitive data input into configs
+                properties:
+                  keyName:
+                    type: string
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                type: object
+              description:
+                type: string
+              entityGuid:
+                description: |-
+                  EntityGUID is the entity (APM service, browser app, workload, ...) the SLI
+                  attaches to. Required and immutable.
+                type: string
+              events:
+                description: ServiceLevelEvents defines the events that make up the
+                  SLI
+                properties:
+                  badEvents:
+                    description: ServiceLevelEventsQuery defines a single events query
+                      (validEvents/goodEvents/badEvents)
+                    properties:
+                      from:
+                        description: |-
+                          NRQL - This scalar represents a NRQL query string.
+
+                          See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                        type: string
+                      select:
+                        description: ServiceLevelEventsQuerySelect defines the SELECT
+                          clause used to aggregate events
+                        properties:
+                          attribute:
+                            type: string
+                          function:
+                            description: ServiceLevelEventsQuerySelectFunction - The
+                              function to use in the SELECT clause.
+                            type: string
+                          threshold:
+                            type: string
+                        type: object
+                      where:
+                        description: |-
+                          NRQL - This scalar represents a NRQL query string.
+
+                          See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                        type: string
+                    required:
+                    - from
+                    type: object
+                  goodEvents:
+                    description: ServiceLevelEventsQuery defines a single events query
+                      (validEvents/goodEvents/badEvents)
+                    properties:
+                      from:
+                        description: |-
+                          NRQL - This scalar represents a NRQL query string.
+
+                          See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                        type: string
+                      select:
+                        description: ServiceLevelEventsQuerySelect defines the SELECT
+                          clause used to aggregate events
+                        properties:
+                          attribute:
+                            type: string
+                          function:
+                            description: ServiceLevelEventsQuerySelectFunction - The
+                              function to use in the SELECT clause.
+                            type: string
+                          threshold:
+                            type: string
+                        type: object
+                      where:
+                        description: |-
+                          NRQL - This scalar represents a NRQL query string.
+
+                          See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                        type: string
+                    required:
+                    - from
+                    type: object
+                  validEvents:
+                    description: ServiceLevelEventsQuery defines a single events query
+                      (validEvents/goodEvents/badEvents)
+                    properties:
+                      from:
+                        description: |-
+                          NRQL - This scalar represents a NRQL query string.
+
+                          See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                        type: string
+                      select:
+                        description: ServiceLevelEventsQuerySelect defines the SELECT
+                          clause used to aggregate events
+                        properties:
+                          attribute:
+                            type: string
+                          function:
+                            description: ServiceLevelEventsQuerySelectFunction - The
+                              function to use in the SELECT clause.
+                            type: string
+                          threshold:
+                            type: string
+                        type: object
+                      where:
+                        description: |-
+                          NRQL - This scalar represents a NRQL query string.
+
+                          See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                        type: string
+                    required:
+                    - from
+                    type: object
+                type: object
+              name:
+                type: string
+              objectives:
+                items:
+                  description: ServiceLevelObjective defines a single SLO target for
+                    the SLI
+                  properties:
+                    description:
+                      type: string
+                    name:
+                      type: string
+                    target:
+                      type: string
+                    timeWindow:
+                      description: ServiceLevelObjectiveTimeWindow defines the time
+                        window configuration of the SLO
+                      properties:
+                        rolling:
+                          description: ServiceLevelObjectiveRollingTimeWindow defines
+                            the rolling time window configuration of the SLO
+                          properties:
+                            count:
+                              type: integer
+                            unit:
+                              description: ServiceLevelObjectiveRollingTimeWindowUnit
+                                - The rolling time window units.
+                              type: string
+                          required:
+                          - count
+                          type: object
+                      type: object
+                  required:
+                  - target
+                  - timeWindow
+                  type: object
+                type: array
+              region:
+                type: string
+            required:
+            - entityGuid
+            - events
+            - name
+            - objectives
+            type: object
+          status:
+            description: ServiceLevelStatus defines the observed state of ServiceLevel
+            properties:
+              appliedSpec:
+                description: ServiceLevelSpec defines the desired state of ServiceLevel
+                properties:
+                  accountId:
+                    type: integer
+                  apiKey:
+                    type: string
+                  apiKeySecret:
+                    description: NewRelicSecret masks sensitive data input into configs
+                    properties:
+                      keyName:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  description:
+                    type: string
+                  entityGuid:
+                    description: |-
+                      EntityGUID is the entity (APM service, browser app, workload, ...) the SLI
+                      attaches to. Required and immutable.
+                    type: string
+                  events:
+                    description: ServiceLevelEvents defines the events that make up
+                      the SLI
+                    properties:
+                      badEvents:
+                        description: ServiceLevelEventsQuery defines a single events
+                          query (validEvents/goodEvents/badEvents)
+                        properties:
+                          from:
+                            description: |-
+                              NRQL - This scalar represents a NRQL query string.
+
+                              See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                            type: string
+                          select:
+                            description: ServiceLevelEventsQuerySelect defines the
+                              SELECT clause used to aggregate events
+                            properties:
+                              attribute:
+                                type: string
+                              function:
+                                description: ServiceLevelEventsQuerySelectFunction
+                                  - The function to use in the SELECT clause.
+                                type: string
+                              threshold:
+                                type: string
+                            type: object
+                          where:
+                            description: |-
+                              NRQL - This scalar represents a NRQL query string.
+
+                              See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                            type: string
+                        required:
+                        - from
+                        type: object
+                      goodEvents:
+                        description: ServiceLevelEventsQuery defines a single events
+                          query (validEvents/goodEvents/badEvents)
+                        properties:
+                          from:
+                            description: |-
+                              NRQL - This scalar represents a NRQL query string.
+
+                              See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                            type: string
+                          select:
+                            description: ServiceLevelEventsQuerySelect defines the
+                              SELECT clause used to aggregate events
+                            properties:
+                              attribute:
+                                type: string
+                              function:
+                                description: ServiceLevelEventsQuerySelectFunction
+                                  - The function to use in the SELECT clause.
+                                type: string
+                              threshold:
+                                type: string
+                            type: object
+                          where:
+                            description: |-
+                              NRQL - This scalar represents a NRQL query string.
+
+                              See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                            type: string
+                        required:
+                        - from
+                        type: object
+                      validEvents:
+                        description: ServiceLevelEventsQuery defines a single events
+                          query (validEvents/goodEvents/badEvents)
+                        properties:
+                          from:
+                            description: |-
+                              NRQL - This scalar represents a NRQL query string.
+
+                              See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                            type: string
+                          select:
+                            description: ServiceLevelEventsQuerySelect defines the
+                              SELECT clause used to aggregate events
+                            properties:
+                              attribute:
+                                type: string
+                              function:
+                                description: ServiceLevelEventsQuerySelectFunction
+                                  - The function to use in the SELECT clause.
+                                type: string
+                              threshold:
+                                type: string
+                            type: object
+                          where:
+                            description: |-
+                              NRQL - This scalar represents a NRQL query string.
+
+                              See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
+                            type: string
+                        required:
+                        - from
+                        type: object
+                    type: object
+                  name:
+                    type: string
+                  objectives:
+                    items:
+                      description: ServiceLevelObjective defines a single SLO target
+                        for the SLI
+                      properties:
+                        description:
+                          type: string
+                        name:
+                          type: string
+                        target:
+                          type: string
+                        timeWindow:
+                          description: ServiceLevelObjectiveTimeWindow defines the
+                            time window configuration of the SLO
+                          properties:
+                            rolling:
+                              description: ServiceLevelObjectiveRollingTimeWindow
+                                defines the rolling time window configuration of the
+                                SLO
+                              properties:
+                                count:
+                                  type: integer
+                                unit:
+                                  description: ServiceLevelObjectiveRollingTimeWindowUnit
+                                    - The rolling time window units.
+                                  type: string
+                              required:
+                              - count
+                              type: object
+                          type: object
+                      required:
+                      - target
+                      - timeWindow
+                      type: object
+                    type: array
+                  region:
+                    type: string
+                required:
+                - entityGuid
+                - events
+                - name
+                - objectives
+                type: object
+              serviceLevelGuid:
+                description: EntityGUID - An encoded Entity GUID
+                type: string
+              serviceLevelId:
+                type: string
+            required:
+            - appliedSpec
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -22,6 +22,7 @@ rules:
   - alertworkflows
   - entitytaggings
   - nrqlconditions
+  - servicelevels
   verbs:
   - create
   - delete
@@ -39,6 +40,7 @@ rules:
   - alertworkflows/finalizers
   - entitytaggings/finalizers
   - nrqlconditions/finalizers
+  - servicelevels/finalizers
   verbs:
   - update
 - apiGroups:
@@ -49,6 +51,7 @@ rules:
   - alertworkflows/status
   - entitytaggings/status
   - nrqlconditions/status
+  - servicelevels/status
   verbs:
   - get
   - patch

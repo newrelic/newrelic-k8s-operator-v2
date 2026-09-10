@@ -8,6 +8,7 @@ resources:
 - bases/alerts.k8s.newrelic.com_alertchannels.yaml
 - bases/alerts.k8s.newrelic.com_alertworkflows.yaml
 - bases/alerts.k8s.newrelic.com_entitytaggings.yaml
+- bases/alerts.k8s.newrelic.com_servicelevels.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:
@@ -19,6 +20,7 @@ patches:
 # - path: patches/webhook_in_alertchannels.yaml
 # - path: patches/webhook_in_alertworkflows.yaml
 # - path: patches/webhook_in_entitytaggings.yaml
+# - path: patches/webhook_in_servicelevels.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable cert-manager, uncomment all the sections with [CERTMANAGER] prefix.
@@ -29,6 +31,7 @@ patches:
 # - path: patches/cainjection_in_alertchannels.yaml
 # - path: patches/cainjection_in_alertworkflows.yaml
 # - path: patches/cainjection_in_entitytaggings.yaml
+# - path: patches/cainjection_in_servicelevels.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # [WEBHOOK] To enable webhook, uncomment the following section

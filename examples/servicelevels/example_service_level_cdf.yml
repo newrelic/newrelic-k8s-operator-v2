@@ -1,0 +1,35 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: ServiceLevel
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: servicelevel-cdf-example
+spec:
+  apiKey: <api_key>
+  # apiKeySecret:
+  #   name: nr-api-key
+  #   namespace: default
+  #   keyName: api-key
+  accountId: 1
+  region: "US"
+  entityGuid: <entity_guid> # Required, immutable - the entity this SLI attaches to
+  name: Latency (distribution metric)
+  description: Proportion of requests served faster than 100ms, measured from a distribution metric.
+  events:
+    validEvents:
+      from: Metric
+      where: "metricName = 'http.server.duration'"
+    goodEvents:
+      from: Metric
+      where: "metricName = 'http.server.duration'"
+      select:
+        function: GET_CDF_COUNT
+        attribute: http.server.duration # required for GET_CDF_COUNT
+        threshold: "0.1" # required for GET_CDF_COUNT, decimal-as-string
+  objectives:
+    - target: "99.9"
+      timeWindow:
+        rolling:
+          count: 28 # one of 1, 7, 28
+          unit: DAY
