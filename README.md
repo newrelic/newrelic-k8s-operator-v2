@@ -17,6 +17,7 @@ Kubernetes operator that facilitates management of New Relic resources from with
 - Alert Channels
 - Alert Workflows
 - Entity Tagging
+- Service Levels
 
 If you are looking for New Relic's Kubernetes operator for managing New Relic's Kubernetes integration, please see [newrelic-k8s-operator](https://github.com/newrelic/newrelic-k8s-operator).
 
@@ -165,6 +166,7 @@ This process can be repeated for any of the examples provided. For more detail o
 - [Alert Destinations](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/resources/notification_destination)
 - [Alert Channels](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/resources/notification_channel)
 - [Alert Workflows](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/resources/workflow)
+- [Service Levels](https://registry.terraform.io/providers/newrelic/newrelic/latest/docs/resources/service_level)
 
 
 

@@ -8,6 +8,7 @@ import (
 	"github.com/newrelic/newrelic-client-go/v2/pkg/config"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/entities"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/notifications"
+	"github.com/newrelic/newrelic-client-go/v2/pkg/servicelevel"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/workflows"
 )
 
@@ -16,6 +17,7 @@ type NewRelicClientInterface interface {
 	Alerts() *alerts.Alerts
 	Entities() *entities.Entities
 	Notifications() *notifications.Notifications
+	ServiceLevel() *servicelevel.Servicelevel
 	Workflows() *workflows.Workflows
 }
 
@@ -36,6 +38,11 @@ func (n *NewRelicClientWrapper) Alerts() *alerts.Alerts {
 // Notifications returns the notifications client
 func (n *NewRelicClientWrapper) Notifications() *notifications.Notifications {
 	return &n.client.Notifications
+}
+
+// ServiceLevel returns the ServiceLevel client
+func (n *NewRelicClientWrapper) ServiceLevel() *servicelevel.Servicelevel {
+	return &n.client.ServiceLevel
 }
 
 // Workflows returns the Workflows client

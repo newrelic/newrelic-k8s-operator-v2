@@ -24,6 +24,8 @@ resources:
 # if you do not want those helpers be installed with your Project.
 - entitytagging_editor_role.yaml
 - entitytagging_viewer_role.yaml
+- servicelevel_editor_role.yaml
+- servicelevel_viewer_role.yaml
 - alertworkflow_editor_role.yaml
 - alertworkflow_viewer_role.yaml
 - alertchannel_editor_role.yaml
