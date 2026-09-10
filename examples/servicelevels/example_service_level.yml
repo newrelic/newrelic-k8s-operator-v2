@@ -1,0 +1,31 @@
+apiVersion: alerts.k8s.newrelic.com/v1
+kind: ServiceLevel
+metadata:
+  labels:
+    app.kubernetes.io/name: newrelic-kubernetes-operator-v2
+    app.kubernetes.io/managed-by: kustomize
+  name: servicelevel-latency-example
+spec:
+  apiKey: <api_key>
+  # apiKeySecret:
+  #   name: nr-api-key
+  #   namespace: default
+  #   keyName: api-key
+  accountId: 1
+  region: "US"
+  entityGuid: <entity_guid> # Required, immutable - the entity this SLI attaches to
+  name: Latency
+  description: Proportion of requests served faster than 100ms.
+  events:
+    validEvents:
+      from: Transaction
+      where: "appName = 'checkout-service' AND transactionType = 'Web'"
+    goodEvents:
+      from: Transaction
+      where: "appName = 'checkout-service' AND transactionType = 'Web' AND duration < 0.1"
+  objectives:
+    - target: "99.9" # decimal-as-string, up to 5 decimal places
+      timeWindow:
+        rolling:
+          count: 7 # one of 1, 7, 28
+          unit: DAY

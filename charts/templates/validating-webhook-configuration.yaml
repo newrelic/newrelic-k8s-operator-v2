@@ -127,3 +127,23 @@ webhooks:
     resources:
     - nrqlconditions
   sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "chart.fullname" . }}-webhook-service'
+      namespace: '{{ .Release.Namespace }}'
+      path: /validate-alerts-k8s-newrelic-com-v1-servicelevel
+  failurePolicy: Fail
+  name: vservicelevel.kb.io
+  rules:
+  - apiGroups:
+    - alerts.k8s.newrelic.com
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - servicelevels
+  sideEffects: None
