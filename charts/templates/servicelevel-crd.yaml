@@ -78,7 +78,7 @@ spec:
                       from:
                         description: |-
                           NRQL - This scalar represents a NRQL query string.
-  
+
                           See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                         type: string
                       select:
@@ -97,7 +97,7 @@ spec:
                       where:
                         description: |-
                           NRQL - This scalar represents a NRQL query string.
-  
+
                           See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                         type: string
                     required:
@@ -110,7 +110,7 @@ spec:
                       from:
                         description: |-
                           NRQL - This scalar represents a NRQL query string.
-  
+
                           See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                         type: string
                       select:
@@ -129,7 +129,7 @@ spec:
                       where:
                         description: |-
                           NRQL - This scalar represents a NRQL query string.
-  
+
                           See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                         type: string
                     required:
@@ -142,7 +142,7 @@ spec:
                       from:
                         description: |-
                           NRQL - This scalar represents a NRQL query string.
-  
+
                           See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                         type: string
                       select:
@@ -161,7 +161,7 @@ spec:
                       where:
                         description: |-
                           NRQL - This scalar represents a NRQL query string.
-  
+
                           See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                         type: string
                     required:
@@ -250,7 +250,7 @@ spec:
                           from:
                             description: |-
                               NRQL - This scalar represents a NRQL query string.
-  
+
                               See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                             type: string
                           select:
@@ -269,7 +269,7 @@ spec:
                           where:
                             description: |-
                               NRQL - This scalar represents a NRQL query string.
-  
+
                               See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                             type: string
                         required:
@@ -282,7 +282,7 @@ spec:
                           from:
                             description: |-
                               NRQL - This scalar represents a NRQL query string.
-  
+
                               See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                             type: string
                           select:
@@ -301,7 +301,7 @@ spec:
                           where:
                             description: |-
                               NRQL - This scalar represents a NRQL query string.
-  
+
                               See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                             type: string
                         required:
@@ -314,7 +314,7 @@ spec:
                           from:
                             description: |-
                               NRQL - This scalar represents a NRQL query string.
-  
+
                               See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                             type: string
                           select:
@@ -333,7 +333,7 @@ spec:
                           where:
                             description: |-
                               NRQL - This scalar represents a NRQL query string.
-  
+
                               See the [NRQL Docs](https://docs.newrelic.com/docs/insights/nrql-new-relic-query-language/nrql-resources/nrql-syntax-components-functions) for more information about NRQL syntax.
                             type: string
                         required:
