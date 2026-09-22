@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -206,6 +207,9 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				err = r.updatePolicy(existingPolicy.ID, &policy)
 				if err != nil {
 					r.Log.Error(err, "failed to update New Relic alert policy")
+					if statusErr := r.updateStatusIfChanged(ctx, &policy); statusErr != nil {
+						r.Log.Error(statusErr, "failed to persist partial condition status")
+					}
 					return ctrl.Result{}, err
 				}
 				r.Log.Info("Policy updated successfully")
@@ -238,6 +242,9 @@ func (r *AlertPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					err = r.handleConditions(&policy)
 					if err != nil {
 						r.Log.Error(err, "failed to reconcile AlertPolicy conditions")
+						if statusErr := r.updateStatusIfChanged(ctx, &policy); statusErr != nil {
+							r.Log.Error(statusErr, "failed to persist partial condition status")
+						}
 						return ctrl.Result{}, err
 					}
 
@@ -359,20 +366,36 @@ func (r *AlertPolicyReconciler) createPolicy(policy *alertsv1.AlertPolicy) error
 	if policy.Spec.Conditions != nil {
 		policy.Status.AppliedSpec.Conditions = policy.Spec.Conditions
 		if len(policy.Spec.Conditions) > 0 {
-			r.Log.Info("Conditions specified for new policy. creating conditions...")
-			for i, polCondition := range policy.Spec.Conditions {
-				if createdCondition, err := r.createCondition(&polCondition, policy); err != nil {
-					r.Log.Error(err, "failed to create condition",
-						"conditionName", polCondition.Name)
-				} else {
-					policy.Spec.Conditions[i] = *createdCondition
-					policy.Status.AppliedSpec.Conditions[i] = *createdCondition
-				}
+			if err := r.createPolicyConditions(policy); err != nil {
+				return err
 			}
 		}
 	}
 
-	// policy.Status.AppliedSpec = &policy.Spec
+	return nil
+}
+
+// createPolicyConditions creates every condition in policy.Spec.Conditions, attempting all of
+// them even if some fail, and returns the first error encountered (if any) so the caller can
+// surface it to Reconcile for a requeue with backoff instead of silently leaving the policy
+// with zero or partial conditions.
+func (r *AlertPolicyReconciler) createPolicyConditions(policy *alertsv1.AlertPolicy) error {
+	r.Log.Info("Conditions specified for new policy. creating conditions...")
+	var allErrors []error
+	for i, polCondition := range policy.Spec.Conditions {
+		if createdCondition, err := r.createCondition(&polCondition, policy); err != nil {
+			r.Log.Error(err, "failed to create condition",
+				"conditionName", polCondition.Name)
+			allErrors = append(allErrors, fmt.Errorf("condition %q: %w", polCondition.Name, err))
+		} else {
+			policy.Spec.Conditions[i] = *createdCondition
+			policy.Status.AppliedSpec.Conditions[i] = *createdCondition
+		}
+	}
+
+	if len(allErrors) > 0 {
+		return allErrors[0]
+	}
 
 	return nil
 }
@@ -620,7 +643,12 @@ type processedAlertConditions struct {
 	processed bool
 }
 
-// handleConditions manages the creation, update, and delete of nrql conditions
+// handleConditions manages the creation, update, and delete of nrql conditions.
+// It attempts every condition, so a single condition's persistent failure
+// doesn't prevent the status snapshot below from recording the conditions that DID apply successfully,
+// otherwise those conditions would never be found in AppliedSpec on the next reconcile
+// and would be redundantly re-updated on every pass. The first error encountered (if any)
+// is returned so the caller can still surface/requeue it.
 func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) error {
 	observedConditions := []alertsv1.PolicyCondition{}
 	if policy.Status.AppliedSpec != nil {
@@ -638,12 +666,15 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 		})
 	}
 
+	var allErrors []error
+
 	for i, configuredCondition := range policy.Spec.Conditions {
 		r.Log.Info("Processing condition", "conditionName", configuredCondition.Spec.Name)
 		existingCondition, err := r.getExistingNrqlCondition(&configuredCondition, policy)
 		if err != nil {
 			r.Log.Error(err, "failed to fetch existing condition")
-			return err
+			allErrors = append(allErrors, fmt.Errorf("condition %q: %w", configuredCondition.Spec.Name, err))
+			continue
 		}
 
 		if existingCondition != nil { // if condition exists in NR already by name
@@ -658,7 +689,8 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 					r.Log.Info("Configuration difference detected. Updating condition to current spec specified.")
 					updatedCondition, err := r.updateCondition(&configuredCondition, policy)
 					if err != nil {
-						return err
+						allErrors = append(allErrors, fmt.Errorf("condition %q: %w", configuredCondition.Spec.Name, err))
+						continue
 					}
 					policy.Spec.Conditions[i] = *updatedCondition //apply latest configuration to spec
 				} else {
@@ -676,14 +708,16 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 			r.Log.Info("Condition exists in New Relic but not in applied status. Reconciling condition to current spec.")
 			updatedCondition, err := r.updateCondition(&configuredCondition, policy)
 			if err != nil {
-				return err
+				allErrors = append(allErrors, fmt.Errorf("condition %q: %w", configuredCondition.Spec.Name, err))
+				continue
 			}
 			policy.Spec.Conditions[i] = *updatedCondition
 			continue
 		} else { //configured condition name does not exist in NR already, create it
 			createdCondition, err := r.createCondition(&configuredCondition, policy)
 			if err != nil {
-				return err
+				allErrors = append(allErrors, fmt.Errorf("condition %q: %w", configuredCondition.Spec.Name, err))
+				continue
 			}
 
 			observedIndex := findAppliedConditionIndex(observedConditions, configuredCondition.Spec.Name)
@@ -701,27 +735,31 @@ func (r *AlertPolicyReconciler) handleConditions(policy *alertsv1.AlertPolicy) e
 	if len(processedConditions) > 0 {
 		remoteConditionsByName, err := r.getExistingNrqlConditionsByName(policy)
 		if err != nil {
-			return err
-		}
-
-		for _, pc := range processedConditions {
-			if !pc.processed {
-				if pc.id == "" {
-					if existingCondition, ok := remoteConditionsByName[pc.name]; ok {
-						pc.id = existingCondition.ID
+			allErrors = append(allErrors, err)
+		} else {
+			for _, pc := range processedConditions {
+				if !pc.processed {
+					if pc.id == "" {
+						if existingCondition, ok := remoteConditionsByName[pc.name]; ok {
+							pc.id = existingCondition.ID
+						}
 					}
-				}
 
-				r.Log.Info("deleting condition", "condName", pc.name)
-				err := r.deleteCondition(pc)
-				if err != nil {
-					return err
+					r.Log.Info("deleting condition", "condName", pc.name)
+					if err := r.deleteCondition(pc); err != nil {
+						allErrors = append(allErrors, fmt.Errorf("condition %q: %w", pc.name, err))
+						continue
+					}
 				}
 			}
 		}
 	}
 
 	policy.Status.AppliedSpec = snapshotAlertPolicySpec(policy.Spec) //apply latest spec to status
+
+	if len(allErrors) > 0 {
+		return allErrors[0]
+	}
 
 	return nil
 }
@@ -869,6 +907,7 @@ func (r *AlertPolicyReconciler) createCondition(condition *alertsv1.PolicyCondit
 			"policyId", polString,
 			"conditionName", condition.Spec.Name,
 			"apiKey", interfaces.PartialAPIKey(r.apiKey),
+			"validationErrors", nrqlConditionValidationErrors(err),
 		)
 		return nil, err
 	}
@@ -907,6 +946,7 @@ func (r *AlertPolicyReconciler) updateCondition(condition *alertsv1.PolicyCondit
 			"conditionId", condition.ID,
 			"conditionName", condition.Spec.Name,
 			"apiKey", interfaces.PartialAPIKey(r.apiKey),
+			"validationErrors", nrqlConditionValidationErrors(err),
 		)
 		return condition, err
 	}
@@ -917,6 +957,25 @@ func (r *AlertPolicyReconciler) updateCondition(condition *alertsv1.PolicyCondit
 	condition.Name = updatedCondition.Name
 
 	return condition, nil
+}
+
+// nrqlConditionValidationErrors extracts field-level validation detail from a NerdGraph
+// error response, if the underlying error carries any. Returns nil if err doesn't wrap a
+// *alerts.GraphQLErrorResponse, or none of its errors carry ValidationErrors.
+func nrqlConditionValidationErrors(err error) []string {
+	var gqlErr *alerts.GraphQLErrorResponse
+	if !stderrors.As(err, &gqlErr) {
+		return nil
+	}
+
+	var details []string
+	for _, e := range gqlErr.Errors {
+		for _, ve := range e.Extensions.ValidationErrors {
+			details = append(details, fmt.Sprintf("%s: %s", ve.Name, ve.Reason))
+		}
+	}
+
+	return details
 }
 
 // deleteCondition deletes a single condition
