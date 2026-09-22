@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"encoding/json"
+	"errors"
 	"strconv"
 	"testing"
 
@@ -372,6 +374,127 @@ func TestHandleConditionsRecreatesRemoteDeletedConditionWithoutStaleDelete(t *te
 
 	if policy.Status.AppliedSpec.Conditions[0].ID != recreatedCondition.ID {
 		t.Fatalf("expected recreated condition ID %q, got %q", recreatedCondition.ID, policy.Status.AppliedSpec.Conditions[0].ID)
+	}
+}
+
+func TestHandleConditionsRecordsAppliedStateForSucceedingConditionDespiteSiblingFailure(t *testing.T) {
+	updatingCondition := withoutConditionMetadata(testPolicyCondition("Temp1", "SELECT count(*) FROM Transaction"))
+	failingCondition := withoutConditionMetadata(testPolicyCondition("Temp2", "SELECT count( FROM SyntheticCheck"))
+
+	remoteBeforeUpdate := testRemoteCondition(updatingCondition)
+	remoteBeforeUpdate.RunbookURL = "https://old.example.com" //force a spec mismatch so Temp1 takes the update path
+
+	//AppliedSpec starts empty, mirroring a policy whose prior reconcile failed before the status snapshot ran
+	policy := testAlertPolicyForConditions([]alertsv1.PolicyCondition{updatingCondition, failingCondition}, nil)
+
+	updatedRemote := testRemoteCondition(updatingCondition)
+	creationErr := errors.New("nrql.query: Unable to parse NRQL query")
+
+	attempted := []string{}
+	reconciler := &AlertPolicyReconciler{
+		searchNrqlConditionsFn: func(int, alerts.NrqlConditionsSearchCriteria) ([]*alerts.NrqlAlertCondition, error) {
+			return []*alerts.NrqlAlertCondition{remoteBeforeUpdate}, nil
+		},
+		updateStaticConditionFn: func(_ int, _ string, updateInput alerts.NrqlConditionUpdateInput) (*alerts.NrqlAlertCondition, error) {
+			attempted = append(attempted, updateInput.Name)
+			return updatedRemote, nil
+		},
+		createStaticConditionFn: func(_ int, _ string, createInput alerts.NrqlConditionCreateInput) (*alerts.NrqlAlertCondition, error) {
+			attempted = append(attempted, createInput.Name)
+			return nil, creationErr
+		},
+	}
+
+	err := reconciler.handleConditions(policy)
+	if err == nil {
+		t.Fatalf("expected an error when a sibling condition fails to create, got nil")
+	}
+
+	if !errors.Is(err, creationErr) {
+		t.Fatalf("expected returned error to wrap the underlying creation error, got: %v", err)
+	}
+
+	if len(attempted) != 2 {
+		t.Fatalf("expected both conditions to be attempted despite the second failing, got %v", attempted)
+	}
+
+	if policy.Status.AppliedSpec == nil {
+		t.Fatalf("expected AppliedSpec to be persisted even though a sibling condition failed")
+	}
+
+	idx := findAppliedConditionIndex(policy.Status.AppliedSpec.Conditions, "Temp1")
+	if idx < 0 {
+		t.Fatalf("expected successfully updated condition Temp1 to be recorded in AppliedSpec, got %+v", policy.Status.AppliedSpec.Conditions)
+	}
+
+	if policy.Status.AppliedSpec.Conditions[idx].ID != updatedRemote.ID {
+		t.Fatalf("expected applied condition ID %q, got %q", updatedRemote.ID, policy.Status.AppliedSpec.Conditions[idx].ID)
+	}
+
+	//Temp2 failed to create - it must not carry a remote ID, otherwise it would be
+	//mistaken for a successfully applied condition on the next reconcile.
+	if failedIdx := findAppliedConditionIndex(policy.Status.AppliedSpec.Conditions, "Temp2"); failedIdx >= 0 {
+		if policy.Status.AppliedSpec.Conditions[failedIdx].ID != "" {
+			t.Fatalf("expected failing condition Temp2 to have no applied remote ID, got %q", policy.Status.AppliedSpec.Conditions[failedIdx].ID)
+		}
+	}
+}
+
+func TestCreatePolicyConditionsReturnsErrorOnConditionCreationFailure(t *testing.T) {
+	failingCondition := withoutConditionMetadata(testPolicyCondition("Failing Condition", "SELECT count(*) FROM A"))
+	succeedingCondition := withoutConditionMetadata(testPolicyCondition("Succeeding Condition", "SELECT count(*) FROM B"))
+	policy := testAlertPolicyForConditions(
+		[]alertsv1.PolicyCondition{failingCondition, succeedingCondition},
+		[]alertsv1.PolicyCondition{failingCondition, succeedingCondition},
+	)
+	remoteSucceeding := testRemoteCondition(succeedingCondition)
+	creationErr := errors.New("account has reached the limit of 6000 alert conditions")
+
+	attempted := []string{}
+	reconciler := &AlertPolicyReconciler{
+		createStaticConditionFn: func(_ int, _ string, createInput alerts.NrqlConditionCreateInput) (*alerts.NrqlAlertCondition, error) {
+			attempted = append(attempted, createInput.Name)
+			if createInput.Name == failingCondition.Spec.Name {
+				return nil, creationErr
+			}
+			return remoteSucceeding, nil
+		},
+	}
+
+	err := reconciler.createPolicyConditions(policy)
+	if err == nil {
+		t.Fatalf("expected an error when a condition fails to create, got nil")
+	}
+
+	if !errors.Is(err, creationErr) {
+		t.Fatalf("expected returned error to wrap the underlying creation error, got: %v", err)
+	}
+
+	if len(attempted) != 2 {
+		t.Fatalf("expected both conditions to be attempted despite the first failing, got %v", attempted)
+	}
+
+	if policy.Status.AppliedSpec.Conditions[1].ID != remoteSucceeding.ID {
+		t.Fatalf("expected succeeding condition to still be recorded as applied, got %+v", policy.Status.AppliedSpec.Conditions[1])
+	}
+}
+
+func TestNrqlConditionValidationErrorsExtractsFieldDetail(t *testing.T) {
+	body := []byte(`{"errors":[{"message":"Validation Error","extensions":{"code":"BAD_REQUEST","errorClass":"CLIENT_ERROR","validationErrors":[{"name":"nrql.query","reason":"must not be blank"}]}}]}`)
+	gqlErr := &alerts.GraphQLErrorResponse{}
+	if err := json.Unmarshal(body, gqlErr); err != nil {
+		t.Fatalf("failed to unmarshal fixture: %v", err)
+	}
+
+	details := nrqlConditionValidationErrors(gqlErr)
+	if len(details) != 1 || details[0] != "nrql.query: must not be blank" {
+		t.Fatalf("expected extracted validation detail, got %v", details)
+	}
+}
+
+func TestNrqlConditionValidationErrorsReturnsNilForOtherErrors(t *testing.T) {
+	if details := nrqlConditionValidationErrors(errors.New("boom")); details != nil {
+		t.Fatalf("expected nil for a non-GraphQL error, got %v", details)
 	}
 }
 
