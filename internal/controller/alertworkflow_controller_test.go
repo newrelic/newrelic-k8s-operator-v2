@@ -42,7 +42,7 @@ var _ = Describe("AlertWorkflow Controller", func() {
 		alertworkflow := &alertsv1.AlertWorkflow{}
 
 		BeforeEach(func() {
-			Skip("Skip this test for now") //TODO: create real test case later
+			Skip("Skip this test for now") // TODO: create real test case later
 			By("creating the custom resource for the Kind AlertWorkflow")
 			err := k8sClient.Get(ctx, typeNamespacedName, alertworkflow)
 			if err != nil && errors.IsNotFound(err) {

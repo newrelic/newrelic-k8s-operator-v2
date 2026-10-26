@@ -19,7 +19,10 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -53,12 +56,41 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
+// defaultAccountIDEnvVar is the env fallback for the --default-account-id flag.
+const defaultAccountIDEnvVar = "NEW_RELIC_ACCOUNT_ID"
+
+// resolveDefaultAccountID returns the operator default account ID. The flag wins;
+// the env var is the fallback. Empty or 0 disables the default (returns 0);
+// a non-numeric or negative value is an error.
+func resolveDefaultAccountID(flagVal string, getenv func(string) string) (int, error) {
+	source := "--default-account-id"
+	raw := strings.TrimSpace(flagVal)
+	if raw == "" {
+		source = defaultAccountIDEnvVar
+		raw = strings.TrimSpace(getenv(defaultAccountIDEnvVar))
+	}
+	if raw == "" {
+		return 0, nil
+	}
+
+	id, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s %q: must be a non-negative integer", source, raw)
+	}
+	if id < 0 {
+		return 0, fmt.Errorf("invalid %s %q: must not be negative", source, raw)
+	}
+
+	return id, nil
+}
+
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
 	var secureMetrics bool
 	var enableHTTP2 bool
+	var defaultAccountID string
 	var tlsOpts []func(*tls.Config)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -70,6 +102,9 @@ func main() {
 		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
+	flag.StringVar(&defaultAccountID, "default-account-id", "",
+		"Default New Relic account ID applied to resources that omit spec.accountId. "+
+			"Falls back to the NEW_RELIC_ACCOUNT_ID env var. Requires webhooks to be enabled.")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -77,6 +112,19 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	accountID, err := resolveDefaultAccountID(defaultAccountID, os.Getenv)
+	if err != nil {
+		setupLog.Error(err, "unable to resolve default account ID")
+		os.Exit(1)
+	}
+	if accountID > 0 {
+		alertsv1.SetDefaultAccountID(accountID)
+		setupLog.Info("using default account ID for resources that omit spec.accountId", "accountId", accountID)
+		if os.Getenv("ENABLE_WEBHOOKS") == "false" {
+			setupLog.Info("default account ID is set but webhooks are disabled; the default will not be applied")
+		}
+	}
 
 	// if the enable-http2 flag is false (the default), http/2 should be disabled
 	// due to its vulnerabilities. More specifically, disabling http/2 will
@@ -154,7 +202,7 @@ func main() {
 
 	log := ctrl.Log.WithName("controllers").WithName("AlertsRegistration")
 
-	//policy
+	// policy
 	if err := (&controller.AlertPolicyReconciler{
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
@@ -165,7 +213,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//nrql condition
+	// nrql condition
 	if err = (&controller.NrqlConditionReconciler{
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
@@ -176,7 +224,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//destination
+	// destination
 	if err = (&controller.AlertDestinationReconciler{
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
@@ -187,7 +235,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//channel
+	// channel
 	if err = (&controller.AlertChannelReconciler{
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
@@ -198,7 +246,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//workflow
+	// workflow
 	if err = (&controller.AlertWorkflowReconciler{
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
@@ -209,7 +257,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//Tagging
+	// Tagging
 	if err = (&controller.EntityTaggingReconciler{
 		Client:       mgr.GetClient(),
 		Scheme:       mgr.GetScheme(),
@@ -220,7 +268,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//service level
+	// service level
 	if err = (&controller.ServiceLevelReconciler{
 		Client:             mgr.GetClient(),
 		Scheme:             mgr.GetScheme(),

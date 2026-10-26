@@ -11,6 +11,7 @@ spec:
   #   name: nr-api-key
   #   namespace: default
   #   key_name: api-key
+  # accountId: 1 # Optional - restricts the entity lookup to this account. Immutable once the resource is created
   region: "US"
   entityNames: # Required - list of existing entity names to apply tags to
     - Entity1

@@ -43,7 +43,7 @@ var _ = Describe("AlertDestination Controller", func() {
 		alertdestination := &alertsv1.AlertDestination{}
 
 		BeforeEach(func() {
-			Skip("Skip this test for now") //TODO: create real test case later
+			Skip("Skip this test for now") // TODO: create real test case later
 			By("creating the custom resource for the Kind AlertDestination")
 			err := k8sClient.Get(ctx, typeNamespacedName, alertdestination)
 			if err != nil && errors.IsNotFound(err) {

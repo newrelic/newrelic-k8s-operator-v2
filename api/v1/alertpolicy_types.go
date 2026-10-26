@@ -30,6 +30,18 @@ const (
 	IncidentPreferencePerConditionAndTarget = "PER_CONDITION_AND_TARGET"
 )
 
+// Status condition type and reasons reported on AlertPolicy.
+const (
+	// AlertPolicyConditionReady reports whether the remote policy is in sync with the spec.
+	AlertPolicyConditionReady = "Ready"
+
+	AlertPolicyReasonSynced              = "Synced"
+	AlertPolicyReasonAccountAccessDenied = "AccountAccessDenied"
+	AlertPolicyReasonAccountMismatch     = "AccountMismatch"
+	AlertPolicyReasonAccountIDChanged    = "AccountIDChanged"
+	AlertPolicyReasonAmbiguousPolicyName = "AmbiguousPolicyName"
+)
+
 // AlertPolicySpec defines the desired state of AlertPolicy
 type AlertPolicySpec struct {
 	// +kubebuilder:validation:Enum=PER_POLICY;PER_CONDITION;PER_CONDITION_AND_TARGET
@@ -58,12 +70,18 @@ type PolicyConditionSpec struct {
 type AlertPolicyStatus struct {
 	AppliedSpec *AlertPolicySpec `json:"appliedSpec"`
 	PolicyID    int              `json:"policyId"`
+	// Conditions reports the sync state of the policy (type Ready).
+	// +optional
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"Ready\")].status"
 
 // AlertPolicy is the Schema for the alertpolicies API
 type AlertPolicy struct {

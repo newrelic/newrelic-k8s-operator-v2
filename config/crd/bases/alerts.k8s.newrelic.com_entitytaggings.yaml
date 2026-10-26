@@ -43,6 +43,11 @@ spec:
           spec:
             description: EntityTaggingSpec defines the desired state of EntityTagging
             properties:
+              accountId:
+                description: |-
+                  AccountID optionally restricts entity lookup to a single New Relic account.
+                  When unset, entities are matched by name across every account the API key can access.
+                type: integer
               apiKey:
                 type: string
               apiKeySecret:
@@ -60,7 +65,6 @@ spec:
                   type: string
                 type: array
               region:
-                description: AccountID    int            `json:"accountId,omitempty"`
                 type: string
               tags:
                 items:
@@ -85,6 +89,11 @@ spec:
               appliedSpec:
                 description: EntityTaggingSpec defines the desired state of EntityTagging
                 properties:
+                  accountId:
+                    description: |-
+                      AccountID optionally restricts entity lookup to a single New Relic account.
+                      When unset, entities are matched by name across every account the API key can access.
+                    type: integer
                   apiKey:
                     type: string
                   apiKeySecret:
@@ -102,7 +111,6 @@ spec:
                       type: string
                     type: array
                   region:
-                    description: AccountID    int            `json:"accountId,omitempty"`
                     type: string
                   tags:
                     items:

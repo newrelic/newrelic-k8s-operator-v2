@@ -78,7 +78,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	r.Log.Info("Starting worfklow reconcile")
 
-	//get API key
+	// get API key
 	r.apiKey, err = r.getAPIKeyOrSecret(workflow)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -88,7 +88,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 
-	//init client
+	// init client
 	alertClient, errAlertClient := r.AlertClient(r.apiKey, workflow.Spec.Region)
 	if errAlertClient != nil {
 		r.Log.Error(errAlertClient, "Failed to create Alert Client")
@@ -96,10 +96,10 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 	r.Alerts = alertClient
 
-	//Handle policy deletion
+	// Handle policy deletion
 	deleteFinalizer := "newrelic.workflows.finalizer"
 
-	//Examine DeletionTimestamp to determine if object is under deletion
+	// Examine DeletionTimestamp to determine if object is under deletion
 	if workflow.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(&workflow, deleteFinalizer) {
 			controllerutil.AddFinalizer(&workflow, deleteFinalizer)
@@ -108,23 +108,23 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			}
 		}
 	} else {
-		//Workflow is being deleted
+		// Workflow is being deleted
 		if controllerutil.ContainsFinalizer(&workflow, deleteFinalizer) {
-			//our finalizer is present, so handle external dependency
+			// our finalizer is present, so handle external dependency
 			if workflow.Status.WorkflowID != "" {
 				if err := r.deleteWorkflow(&workflow); err != nil {
-					//if fail to delete the external dependency here, return with error so it can be retried
+					// if fail to delete the external dependency here, return with error so it can be retried
 					return ctrl.Result{}, err
 				}
 			}
-			//remove finalizer from the list and update it
+			// remove finalizer from the list and update it
 			controllerutil.RemoveFinalizer(&workflow, deleteFinalizer)
 			if err := r.Update(ctx, &workflow); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
 
-		//stop reconciliation as item is being deleted
+		// stop reconciliation as item is being deleted
 		return ctrl.Result{}, nil
 	}
 
@@ -135,7 +135,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			return ctrl.Result{}, err
 		}
 
-		if existingWorkflowId != "" { //workflow exists in NR, check if updates are needed
+		if existingWorkflowId != "" { // workflow exists in NR, check if updates are needed
 			if len(workflow.Spec.Channels) > 0 {
 				if r.haveChannelsChanged(&workflow) {
 					r.Log.Info("channel spec changed, updating channels")
@@ -143,10 +143,16 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 					if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
 						return ctrl.Result{}, err
 					}
-					r.handleChannels(&workflow, &configuredDestinations)
-					r.updateWorkflow(&workflow)
+					if err := r.handleChannels(&workflow, &configuredDestinations); err != nil {
+						r.Log.Error(err, "failed to handle channels")
+						return ctrl.Result{}, err
+					}
+					if err := r.updateWorkflow(&workflow); err != nil {
+						r.Log.Error(err, "failed to update workflow")
+						return ctrl.Result{}, err
+					}
 
-					//Update Workflow Status
+					// Update Workflow Status
 					err = r.Status().Update(ctx, &workflow)
 					if err != nil {
 						r.Log.Error(err, "failed to update AlertWorkflow status")
@@ -156,9 +162,12 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 					r.Log.Info("channels unchanged - checking if workflow config changed")
 					if r.hasWorkflowChanged(&workflow) {
 						r.Log.Info("config mismatch, updating workflow")
-						r.updateWorkflow(&workflow)
+						if err := r.updateWorkflow(&workflow); err != nil {
+							r.Log.Error(err, "failed to update workflow")
+							return ctrl.Result{}, err
+						}
 
-						//Update Workflow Status
+						// Update Workflow Status
 						err = r.Status().Update(ctx, &workflow)
 						if err != nil {
 							r.Log.Error(err, "failed to update AlertWorkflow status")
@@ -183,7 +192,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 				return ctrl.Result{}, err
 			}
 
-			//Update Workflow Status
+			// Update Workflow Status
 			err = r.Status().Update(ctx, &workflow)
 			if err != nil {
 				r.Log.Error(err, "failed to update AlertWorkflow status")
@@ -191,7 +200,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			}
 		}
 
-	} else { //no workflowId in state, so create -- TODO: need to be able to filter by name when fetching, client currently only allows ID
+	} else { // no workflowId in state, so create -- TODO: need to be able to filter by name when fetching, client currently only allows ID
 		r.Log.Info("No workflow id in state - Creating new workflow")
 		var configuredDestinations alertsv1.AlertDestinationList
 		if err := r.List(ctx, &configuredDestinations, client.InNamespace(req.Namespace)); err != nil {
@@ -207,7 +216,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			return ctrl.Result{}, err
 		}
 
-		//Update Workflow Status
+		// Update Workflow Status
 		err = r.Status().Update(ctx, &workflow)
 		if err != nil {
 			r.Log.Error(err, "failed to update AlertWorkflow status")
@@ -216,7 +225,7 @@ func (r *AlertWorkflowReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	}
 
-	//Update Workflow Status
+	// Update Workflow Status
 	r.Log.Info("Updating status...")
 	err = r.Status().Update(ctx, &workflow)
 	if err != nil {
@@ -246,7 +255,7 @@ func (r *AlertWorkflowReconciler) hasWorkflowChanged(workflow *alertsv1.AlertWor
 	}
 
 	for i := range configuredWorkflow.Channels {
-		if i < len(observedWorkflow.AppliedSpec.Channels) { //if a new configured channel is not in current status
+		if i < len(observedWorkflow.AppliedSpec.Channels) { // if a new configured channel is not in current status
 			if len(configuredWorkflow.Channels[i].NotificationTriggers) != len(observedWorkflow.AppliedSpec.Channels[i].NotificationTriggers) ||
 				configuredWorkflow.Channels[i].UpdateOriginalMessage != observedWorkflow.AppliedSpec.Channels[i].UpdateOriginalMessage {
 				return true
@@ -301,13 +310,9 @@ func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflo
 
 	for i, configuredChannel := range workflow.Spec.Channels {
 		r.Log.Info("Processing channel", "channelId", configuredChannel.ChannelID)
-		existingChannelId, err := r.getExistingChannel(&configuredChannel, workflow.Spec.AccountID) //nolint:golint
-		if err != nil {
-			r.Log.Error(err, "failed to fetch existing channel")
-			return err
-		}
+		existingChannelId := r.getExistingChannel(&configuredChannel, workflow.Spec.AccountID) //nolint:golint
 
-		if existingChannelId != "" { //channel exists in NR
+		if existingChannelId != "" { // channel exists in NR
 			for _, observedChannel := range workflow.Status.AppliedSpec.Channels {
 				if observedChannel.ChannelID == configuredChannel.ChannelID {
 					processedChannels[i].processed = true
@@ -322,7 +327,7 @@ func (r *AlertWorkflowReconciler) handleChannels(workflow *alertsv1.AlertWorkflo
 					}
 				}
 			}
-		} else { //channel doesn't exist in NR (newly added to spec), create it
+		} else { // channel doesn't exist in NR (newly added to spec), create it
 			r.Log.Info("Channel does not exist, creating channel", "channelName", configuredChannel.Spec.Name)
 			createdChannel, err := r.createChannel(&configuredChannel, workflow.Spec.AccountID, configuredDestinations)
 			if err != nil {
@@ -382,7 +387,7 @@ func (r *AlertWorkflowReconciler) createChannels(workflow *alertsv1.AlertWorkflo
 
 func (r *AlertWorkflowReconciler) createChannel(channel *alertsv1.DestinationChannel, accountID int, configuredDestinations *alertsv1.AlertDestinationList) (*alertsv1.DestinationChannel, error) {
 	r.Log.Info("Checking for existing destination", "destinationName", channel.Spec.DestinationName)
-	if len(configuredDestinations.Items) > 0 { //Check for existing operator created destinations
+	if len(configuredDestinations.Items) > 0 { // Check for existing operator created destinations
 		for _, destination := range configuredDestinations.Items {
 			if destination.Status.AppliedSpec.Name == channel.Spec.DestinationName {
 				r.Log.Info("Existing destination found", "destinationId", destination.Status.DestinationID)
@@ -390,7 +395,7 @@ func (r *AlertWorkflowReconciler) createChannel(channel *alertsv1.DestinationCha
 				break
 			}
 		}
-	} else { //check for existing destinations in NR (created outside of operator)
+	} else { // check for existing destinations in NR (created outside of operator)
 		matchedDestinationID, err := r.getExistingDestination(channel, accountID)
 		if err != nil {
 			r.Log.Error(err, "failed to fetch existing destination, cannot create channel without an existing destination")
@@ -523,7 +528,7 @@ func (r *AlertWorkflowReconciler) translateChannelCreateInput(channel *alertsv1.
 func (r *AlertWorkflowReconciler) translateChannelUpdateInput(channel *alertsv1.DestinationChannel) notifications.AiNotificationsChannelUpdate {
 	channelInput := notifications.AiNotificationsChannelUpdate{}
 	channelInput.Name = channel.Spec.Name
-	channelInput.Active = channel.Spec.Active //idk what this field actually does
+	channelInput.Active = channel.Spec.Active // idk what this field actually does
 
 	if channel.Spec.Properties != nil {
 		for _, prop := range channel.Spec.Properties {
@@ -542,7 +547,7 @@ func (r *AlertWorkflowReconciler) translateChannelUpdateInput(channel *alertsv1.
 	return channelInput
 }
 
-func (r *AlertWorkflowReconciler) getExistingChannel(channel *alertsv1.DestinationChannel, accountID int) (string, error) {
+func (r *AlertWorkflowReconciler) getExistingChannel(channel *alertsv1.DestinationChannel, accountID int) string {
 	r.Log.Info("Checking for existing channel", "channelName", channel.Spec.Name)
 
 	searchParams := ai.AiNotificationsChannelFilter{
@@ -570,10 +575,10 @@ func (r *AlertWorkflowReconciler) getExistingChannel(channel *alertsv1.Destinati
 			}
 		}
 
-		return channel.ChannelID, nil
+		return channel.ChannelID
 	}
 
-	return "", nil
+	return ""
 }
 
 // createWorkflow creates a new workflow
@@ -616,7 +621,7 @@ func (r *AlertWorkflowReconciler) createWorkflow(workflow *alertsv1.AlertWorkflo
 func (r *AlertWorkflowReconciler) updateWorkflow(workflow *alertsv1.AlertWorkflow) error {
 	r.Log.Info("Updating workflow", "workflowName", workflow.Spec.Name)
 
-	//need to add channelids to spec before updating/re-applying status
+	// need to add channelids to spec before updating/re-applying status
 	if len(workflow.Status.AppliedSpec.Channels) > 0 {
 		for c, channel := range workflow.Status.AppliedSpec.Channels {
 			workflow.Spec.Channels[c].ChannelID = channel.ChannelID
@@ -795,7 +800,7 @@ func (r *AlertWorkflowReconciler) translateWorkflowUpdateInput(workflow *alertsv
 func (r *AlertWorkflowReconciler) getExistingWorkflowById(workflow *alertsv1.AlertWorkflow) (string, error) { //nolint:golint
 	r.Log.Info("Checking for existing workflow", "workflowName", workflow.Spec.Name)
 
-	searchParams := ai.AiWorkflowsFilters{ //TODO: switch to name?
+	searchParams := ai.AiWorkflowsFilters{ // TODO: switch to name?
 		ID: workflow.Status.WorkflowID,
 	}
 
@@ -839,7 +844,7 @@ func (r *AlertWorkflowReconciler) getAPIKeyOrSecret(workflow alertsv1.AlertWorkf
 			return "", getErr
 		}
 
-		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[workflow.Spec.APIKeySecret.KeyName])) //in case key was encoded with new lines/spaces by accident
+		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[workflow.Spec.APIKeySecret.KeyName])) // in case key was encoded with new lines/spaces by accident
 
 		return cleanKey, nil
 	}

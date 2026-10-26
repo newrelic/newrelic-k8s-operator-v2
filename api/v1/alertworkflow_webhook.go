@@ -105,6 +105,8 @@ func (r *AlertWorkflow) ValidateDelete() (admission.Warnings, error) {
 
 // ApplyDefaults sets default values for required fields if not set
 func (r *AlertWorkflow) ApplyDefaults() {
+	applyDefaultAccountID(&r.Spec.AccountID)
+
 	if r.Spec.Region == "" {
 		r.Spec.Region = "US"
 	}
@@ -118,7 +120,7 @@ func (r *AlertWorkflow) ValidateAPIKeyOrSecret() field.ErrorList {
 	apiKeySecretSet := r.Spec.APIKeySecret != (NewRelicSecret{})
 
 	if !(r.Spec.AccountID > 0) {
-		keyErrs = append(keyErrs, field.Required(field.NewPath("spec").Child("accountId"), "accountId must be set as type integer"))
+		keyErrs = append(keyErrs, accountIDRequiredError())
 	}
 
 	if !apiKeySet && !apiKeySecretSet {
@@ -258,7 +260,7 @@ func (r *AlertWorkflow) ValidateChannelSchema() field.ErrorList {
 						}
 					}
 
-					//properties validation
+					// properties validation
 					if channel.Spec.Properties != nil {
 						if len(channel.Spec.Properties) > 0 {
 							for i, prop := range channel.Spec.Properties {
