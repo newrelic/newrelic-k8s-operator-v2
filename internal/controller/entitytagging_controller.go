@@ -66,7 +66,7 @@ type EntityTaggingReconciler struct {
 func (r *EntityTaggingReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	//Fetch EntityTagging instance
+	// Fetch EntityTagging instance
 	var entity alertsv1.EntityTagging
 	err := r.Get(ctx, req.NamespacedName, &entity)
 	if err != nil {
@@ -78,7 +78,7 @@ func (r *EntityTaggingReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 
-	//get API key
+	// get API key
 	r.apiKey, err = r.getAPIKeyOrSecret(entity)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -95,10 +95,10 @@ func (r *EntityTaggingReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 	r.Entities = entityClient
 
-	//Handle entity tags deletion
+	// Handle entity tags deletion
 	deleteFinalizer := "newrelic.entitytags.finalizer"
 
-	//Examine DeletionTimestamp to determine if object is under deletion
+	// Examine DeletionTimestamp to determine if object is under deletion
 	if entity.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(&entity, deleteFinalizer) {
 			r.Log.Info("Adding finalizer for EntityTagging resource")
@@ -110,7 +110,7 @@ func (r *EntityTaggingReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			return ctrl.Result{}, nil
 		}
 	} else {
-		//Entity Tags are being deleted
+		// Entity Tags are being deleted
 		if controllerutil.ContainsFinalizer(&entity, deleteFinalizer) {
 			if len(entity.Status.ManagedEntities) > 0 {
 				var tagKeys []string
@@ -143,7 +143,7 @@ func (r *EntityTaggingReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		r.Log.Info("First-time reconciliation: fetching entities and applying all specified tags.")
 
 		// Fetch all entities in spec by name
-		fetchedEntities, err := r.fetchEntitiesByName(entity.Spec.EntityNames)
+		fetchedEntities, err := r.fetchEntitiesByName(entity.Spec.EntityNames, entity.Spec.AccountID)
 		if err != nil {
 			r.Log.Error(err, "Failed to fetch entities during initial creation.")
 			return ctrl.Result{}, err
@@ -254,13 +254,42 @@ func compareTagValues(a, b []string) bool {
 	return reflect.DeepEqual(aCopy, bCopy)
 }
 
+// validateEntityNames rejects entity names that cannot be safely quoted into the entity search query.
+// Names are single-quoted without escaping, so a quote or backslash would break out of the literal;
+// the check is repeated here because the validating webhook can be disabled.
+func validateEntityNames(entityNames []string) error {
+	for _, name := range entityNames {
+		if strings.ContainsAny(name, `'\`) {
+			return fmt.Errorf("entity name %q contains a single quote or backslash, which is not supported in entity name lookups", name)
+		}
+	}
+
+	return nil
+}
+
+// buildEntitySearchQuery builds the entity search query for a list of entityNames
+// when accountID is greater than 0, results are restricted to that account
+func buildEntitySearchQuery(entityNames []string, accountID int) string {
+	query := fmt.Sprintf("reporting is true and name in (%s)", buildEntityNameFilter(entityNames))
+	if accountID > 0 {
+		query += fmt.Sprintf(" and accountId = %d", accountID)
+	}
+
+	return query
+}
+
 // fetchEntitiesByName queries for a list of entityNames and returns a slice of ManagedEntity structs
+// when accountID is greater than 0, only entities in that account are returned
 // NOTE: only one unique guid is returned per entity name, so it is expected that you don't have duplicate entities with the same name
-func (r *EntityTaggingReconciler) fetchEntitiesByName(entityNames []string) ([]alertsv1.ManagedEntity, error) {
+func (r *EntityTaggingReconciler) fetchEntitiesByName(entityNames []string, accountID int) ([]alertsv1.ManagedEntity, error) {
 	r.Log.Info("Fetching remote entities to reconcile")
 
-	nameFilter := buildEntityNameFilter(entityNames)
-	query := fmt.Sprintf("reporting is true and name in (%s)", nameFilter)
+	if err := validateEntityNames(entityNames); err != nil {
+		r.Log.Error(err, "invalid entity name, not sending entity search")
+		return nil, err
+	}
+
+	query := buildEntitySearchQuery(entityNames, accountID)
 
 	result, err := r.Entities.Entities().GetEntitySearchByQuery(entities.EntitySearchOptions{}, query, nil)
 	if err != nil {
@@ -275,7 +304,7 @@ func (r *EntityTaggingReconciler) fetchEntitiesByName(entityNames []string) ([]a
 		for _, entity := range result.Results.Entities {
 			entityName := entity.GetName()
 
-			//check if there is already a guid stored for a given entity name, skip it
+			// check if there is already a guid stored for a given entity name, skip it
 			if _, found := processedNames[entityName]; found {
 				r.Log.Info("Duplicate entity found, ignore subsequent GUID(s). Only the first result returned is tagged and stored.",
 					"name", entityName,
@@ -349,7 +378,7 @@ func (r *EntityTaggingReconciler) reconcileEntities(entity *alertsv1.EntityTaggi
 
 	// fetch guids
 	if len(newEntityNames) > 0 {
-		fetchedEntities, err := r.fetchEntitiesByName(newEntityNames)
+		fetchedEntities, err := r.fetchEntitiesByName(newEntityNames, entity.Spec.AccountID)
 		if err != nil {
 			return err
 		}
@@ -411,7 +440,7 @@ func (r *EntityTaggingReconciler) handleTags(entity *alertsv1.EntityTagging) err
 			r.Log.Error(err, "Failed to fetch remote tags for entity", "guid", guid)
 			allErrors = append(allErrors, fmt.Errorf("failed to fetch remote tags for guid %s: %w", guid, err))
 			continue
-			//return err
+			// return err
 		}
 
 		// Convert remote tags into a map
@@ -457,7 +486,7 @@ func (r *EntityTaggingReconciler) handleTags(entity *alertsv1.EntityTagging) err
 			r.Log.Info("Executing tag deletion(s) to correct drift", "guid", guid, "count", len(tagsToDelete))
 			if err := r.deleteEntityTags(guid, tagsToDelete); err != nil {
 				allErrors = append(allErrors, err)
-				//return err
+				// return err
 			}
 		}
 
@@ -465,7 +494,7 @@ func (r *EntityTaggingReconciler) handleTags(entity *alertsv1.EntityTagging) err
 			r.Log.Info("Executing tag addition(s)", "guid", guid, "count", len(tagsToAdd))
 			if err := r.addEntityTags(guid, tagsToAdd); err != nil {
 				allErrors = append(allErrors, err)
-				//return err
+				// return err
 			}
 		}
 
@@ -473,7 +502,7 @@ func (r *EntityTaggingReconciler) handleTags(entity *alertsv1.EntityTagging) err
 			r.Log.Info("Executing tag update(s) to correct drift", "guid", guid, "count", len(tagsToUpdate))
 			if err := r.updateEntityTags(guid, tagsToUpdate); err != nil {
 				allErrors = append(allErrors, err)
-				//return err
+				// return err
 			}
 		}
 	}
@@ -556,7 +585,7 @@ func (r *EntityTaggingReconciler) getAPIKeyOrSecret(entity alertsv1.EntityTaggin
 			return "", getErr
 		}
 
-		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[entity.Spec.APIKeySecret.KeyName])) //in case key was encoded with new lines/spaces by accident
+		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[entity.Spec.APIKeySecret.KeyName])) // in case key was encoded with new lines/spaces by accident
 
 		return cleanKey, nil
 	}

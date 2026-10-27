@@ -17,6 +17,8 @@ limitations under the License.
 package v1
 
 import (
+	"strings"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -84,6 +86,10 @@ func (r *EntityTagging) ValidateUpdate(old runtime.Object) (admission.Warnings, 
 		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("region"), r.Spec.Region, "region is immutable and cannot be changed after creation"))
 	}
 
+	if r.Spec.AccountID != oldEntity.Spec.AccountID {
+		allErrs = append(allErrs, field.Invalid(field.NewPath("spec").Child("accountId"), r.Spec.AccountID, "accountId is immutable and cannot be changed after creation"))
+	}
+
 	allErrs = append(allErrs, r.ValidateAPIKeyOrSecret()...)
 	allErrs = append(allErrs, r.ValidateTaggingSchema()...)
 
@@ -136,6 +142,10 @@ func (r *EntityTagging) ValidateAPIKeyOrSecret() field.ErrorList {
 func (r *EntityTagging) ValidateTaggingSchema() field.ErrorList {
 	var taggingErrs field.ErrorList
 
+	if r.Spec.AccountID < 0 {
+		taggingErrs = append(taggingErrs, field.Invalid(field.NewPath("spec").Child("accountId"), r.Spec.AccountID, "accountId cannot be negative"))
+	}
+
 	validRegions := map[string]bool{"US": true, "EU": true}
 	if !validRegions[r.Spec.Region] {
 		taggingErrs = append(taggingErrs, field.NotSupported(field.NewPath("spec").Child("region"), r.Spec.Region, []string{"US", "EU"}))
@@ -147,6 +157,9 @@ func (r *EntityTagging) ValidateTaggingSchema() field.ErrorList {
 		for e, name := range r.Spec.EntityNames {
 			if name == "" {
 				taggingErrs = append(taggingErrs, field.Invalid(field.NewPath("spec").Child("entityNames").Index(e), name, "entity names cannot be empty strings"))
+			} else if strings.ContainsAny(name, `'\`) {
+				// names are single-quoted into the entity search query without escaping
+				taggingErrs = append(taggingErrs, field.Invalid(field.NewPath("spec").Child("entityNames").Index(e), name, "entity names cannot contain single quotes or backslashes"))
 			}
 		}
 	}

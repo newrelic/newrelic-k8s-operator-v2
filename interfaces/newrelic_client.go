@@ -67,7 +67,7 @@ func NewClient(apiKey string, regionVal string) (*newrelic.NewRelic, error) {
 	return client, nil
 }
 
-// InitNewClient initalizes a given client's CRUD functionality
+// InitNewClient initializes a given client's CRUD functionality
 func InitNewClient(apiKey string, regionName string) (NewRelicClientInterface, error) {
 	client, err := NewClient(apiKey, regionName)
 	if err != nil {

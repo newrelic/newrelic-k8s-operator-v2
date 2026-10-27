@@ -32,7 +32,9 @@ type EntityTaggingSpec struct {
 type TagBaseSpec struct {
 	APIKey       string         `json:"apiKey,omitempty"`
 	APIKeySecret NewRelicSecret `json:"apiKeySecret,omitempty"`
-	// AccountID    int            `json:"accountId,omitempty"`
+	// AccountID optionally restricts entity lookup to a single New Relic account.
+	// When unset, entities are matched by name across every account the API key can access.
+	AccountID   int          `json:"accountId,omitempty"`
 	Region      string       `json:"region,omitempty"`
 	EntityNames []string     `json:"entityNames"`
 	Tags        []*EntityTag `json:"tags"`

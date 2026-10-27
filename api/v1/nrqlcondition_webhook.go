@@ -106,6 +106,8 @@ func (r *NrqlCondition) ValidateDelete() (admission.Warnings, error) {
 
 // ApplyDefaults sets default values for required fields if not set
 func (r *NrqlCondition) ApplyDefaults() {
+	applyDefaultAccountID(&r.Spec.AccountID)
+
 	if r.Spec.Region == "" {
 		r.Spec.Region = "US"
 	}
@@ -119,7 +121,7 @@ func (r *NrqlCondition) ValidateAPIKeyOrSecret() field.ErrorList {
 	apiKeySecretSet := r.Spec.APIKeySecret != (NewRelicSecret{})
 
 	if !(r.Spec.AccountID > 0) {
-		keyErrs = append(keyErrs, field.Required(field.NewPath("spec").Child("accountId"), "accountId must be set as type integer"))
+		keyErrs = append(keyErrs, accountIDRequiredError())
 	}
 
 	if !apiKeySet && !apiKeySecretSet {
@@ -196,7 +198,7 @@ func (r *NrqlCondition) ValidateConditionSchema() field.ErrorList {
 			}
 
 			if !signalSet {
-				//baseline conditions must have a minimum of 120 seconds thresholdDuration for some reason
+				// baseline conditions must have a minimum of 120 seconds thresholdDuration for some reason
 				if r.Spec.Type == "BASELINE" {
 					if term.ThresholdDuration < 120 || term.ThresholdDuration > 86400 {
 						condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("terms").Index(t).Child("thresholdDuration"), term.ThresholdDuration, "baseline thresholdDuration must be within 120-86400 seconds when baseline type is selected, and must be a multiple of the aggregation window [default: 60]"))
@@ -232,7 +234,7 @@ func (r *NrqlCondition) ValidateConditionSchema() field.ErrorList {
 			condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("signal").Child("evaluationOffset"), r.Spec.Signal.EvaluationOffset, "evaluationOffset is deprecated - aggregationDelay or aggregationTimer should be used instead"))
 		}
 
-		//event flow/cadence specific validation
+		// event flow/cadence specific validation
 		if *r.Spec.Signal.AggregationMethod == alerts.NrqlConditionAggregationMethodTypes.EventFlow || *r.Spec.Signal.AggregationMethod == alerts.NrqlConditionAggregationMethodTypes.Cadence {
 			if r.Spec.Signal.AggregationTimer != nil {
 				condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("signal").Child("aggregationTimer"), r.Spec.Signal.AggregationTimer, "aggregationTimer is only applicable when aggregationMethod is EVENT_TIMER"))
@@ -255,7 +257,7 @@ func (r *NrqlCondition) ValidateConditionSchema() field.ErrorList {
 			}
 		}
 
-		//event timer specific validation
+		// event timer specific validation
 		if *r.Spec.Signal.AggregationMethod == alerts.NrqlConditionAggregationMethodTypes.EventTimer {
 			if r.Spec.Signal.AggregationDelay != nil {
 				condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("signal").Child("aggregationDelay"), r.Spec.Signal.AggregationDelay, "aggregationDelay is only applicable when aggregationMethod is EVENT_FLOW OR CADENCE"))

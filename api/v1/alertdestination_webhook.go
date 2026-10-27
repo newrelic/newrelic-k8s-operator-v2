@@ -102,6 +102,8 @@ func (r *AlertDestination) ValidateDelete() (admission.Warnings, error) {
 
 // ApplyDefaults sets default values for required fields if not set
 func (r *AlertDestination) ApplyDefaults() {
+	applyDefaultAccountID(&r.Spec.AccountID)
+
 	if r.Spec.Region == "" {
 		r.Spec.Region = "US"
 	}
@@ -115,7 +117,7 @@ func (r *AlertDestination) ValidateAPIKeyOrSecret() field.ErrorList {
 	apiKeySecretSet := r.Spec.APIKeySecret != (NewRelicSecret{})
 
 	if !(r.Spec.AccountID > 0) {
-		keyErrs = append(keyErrs, field.Required(field.NewPath("spec").Child("accountId"), "accountId must be set as type integer"))
+		keyErrs = append(keyErrs, accountIDRequiredError())
 	}
 
 	if !apiKeySet && !apiKeySecretSet {
@@ -155,7 +157,7 @@ func (r *AlertDestination) ValidateDestinationSchema() field.ErrorList {
 		}
 	}
 
-	//properties validation
+	// properties validation
 	if r.Spec.Properties == nil {
 		destErrors = append(destErrors, field.Required(field.NewPath("spec").Child("properties"), "properties must be set"))
 	} else {
@@ -197,7 +199,7 @@ func (r *AlertDestination) ValidateDestinationSchema() field.ErrorList {
 		}
 	}
 
-	//auth validation
+	// auth validation
 	if r.Spec.Type == notifications.AiNotificationsDestinationTypeTypes.JIRA || r.Spec.Type == notifications.AiNotificationsDestinationTypeTypes.SERVICE_NOW_APP || r.Spec.Type == notifications.AiNotificationsDestinationTypeTypes.PAGERDUTY_ACCOUNT_INTEGRATION || r.Spec.Type == notifications.AiNotificationsDestinationTypeTypes.PAGERDUTY_SERVICE_INTEGRATION {
 		if r.Spec.Auth == nil {
 			destErrors = append(destErrors, field.Required(field.NewPath("spec").Child("auth"), "auth block must be set"))

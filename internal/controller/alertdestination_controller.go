@@ -77,7 +77,7 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	r.Log.Info("Starting destination reconcile")
 
-	//get API key
+	// get API key
 	r.apiKey, err = r.getAPIKeyOrSecret(destination)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -87,7 +87,7 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
-	//init client
+	// init client
 	alertClient, errAlertClient := r.AlertClient(r.apiKey, destination.Spec.Region)
 	if errAlertClient != nil {
 		r.Log.Error(errAlertClient, "Failed to create Alert Client")
@@ -95,10 +95,10 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 	r.Alerts = alertClient
 
-	//Handle destination deletion
+	// Handle destination deletion
 	deleteFinalizer := "newrelic.destination.finalizer"
 
-	//Examine DeletionTimestamp to determine if object is under deletion
+	// Examine DeletionTimestamp to determine if object is under deletion
 	if destination.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(&destination, deleteFinalizer) {
 			controllerutil.AddFinalizer(&destination, deleteFinalizer)
@@ -107,7 +107,7 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			}
 		}
 	} else {
-		//destination being deleted
+		// destination being deleted
 		if controllerutil.ContainsFinalizer(&destination, deleteFinalizer) {
 			if err := r.deleteDestination(&destination); err != nil {
 				return ctrl.Result{}, err
@@ -121,20 +121,20 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, nil
 	}
 
-	//no config changes
+	// no config changes
 	if reflect.DeepEqual(&destination.Spec, destination.Status.AppliedSpec) {
 		r.Log.Info("No config changes. Skipping reconcile")
 		return ctrl.Result{}, nil
 	}
 
-	//Look for existing destination
+	// Look for existing destination
 	existingDestId, err := r.getExistingDestination(&destination) //nolint:golint
 	if err != nil {
 		r.Log.Error(err, "failed to fetch existing destination")
 		return ctrl.Result{}, err
 	}
 
-	if existingDestId != "" && destination.Status.DestinationID != "" { //exists, and no previous state
+	if existingDestId != "" && destination.Status.DestinationID != "" { // exists, and no previous state
 		r.Log.Info("Destination found and previous state exists, checking for config mismatch")
 
 		if !reflect.DeepEqual(&destination.Spec, destination.Status.AppliedSpec) {
@@ -155,8 +155,8 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			r.Log.Info("Destination unchanged, no update required")
 			return ctrl.Result{}, nil
 		}
-	} else { //doesn't exist
-		if destination.Status.DestinationID != "" && !reflect.DeepEqual(&destination.Spec, destination.Status.AppliedSpec) { //handles name change scenario (to not create a duplicate destination)
+	} else { // doesn't exist
+		if destination.Status.DestinationID != "" && !reflect.DeepEqual(&destination.Spec, destination.Status.AppliedSpec) { // handles name change scenario (to not create a duplicate destination)
 			r.Log.Info("updating existing destination",
 				"destinationId", destination.Status.DestinationID,
 				"destinationName", destination.Status.AppliedSpec.Name,
@@ -186,7 +186,7 @@ func (r *AlertDestinationReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
-	//update status
+	// update status
 	err = r.Status().Update(ctx, &destination)
 	if err != nil {
 		r.Log.Error(err, "failed to update AlertDestination status")
@@ -427,7 +427,7 @@ func (r *AlertDestinationReconciler) getAPIKeyOrSecret(destination alertsv1.Aler
 			return "", getErr
 		}
 
-		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[destination.Spec.APIKeySecret.KeyName])) //in case key was encoded with new lines/spaces by accident
+		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[destination.Spec.APIKeySecret.KeyName])) // in case key was encoded with new lines/spaces by accident
 
 		return cleanKey, nil
 	}
