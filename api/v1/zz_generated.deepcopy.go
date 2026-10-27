@@ -24,6 +24,7 @@ import (
 	"github.com/newrelic/newrelic-client-go/v2/pkg/alerts"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/notifications"
 	"github.com/newrelic/newrelic-client-go/v2/pkg/workflows"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -499,6 +500,13 @@ func (in *AlertPolicyStatus) DeepCopyInto(out *AlertPolicyStatus) {
 		in, out := &in.AppliedSpec, &out.AppliedSpec
 		*out = new(AlertPolicySpec)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.Conditions != nil {
+		in, out := &in.Conditions, &out.Conditions
+		*out = make([]metav1.Condition, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 }
 

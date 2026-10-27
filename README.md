@@ -107,6 +107,25 @@ helm repo update
 helm install nr-operator-v2 newrelic-resource-operator/nr-operator-v2
 ```
 
+### Default account ID
+
+To avoid setting `spec.accountId` on every resource, configure a default account ID for the operator:
+
+```bash
+helm install nr-operator-v2 newrelic-resource-operator/nr-operator-v2 \
+  --set controllerManager.manager.defaultAccountId=1234567
+```
+
+Or read it from a Kubernetes Secret (takes precedence over `defaultAccountId` when both `name` and `key` are set):
+
+```bash
+helm install nr-operator-v2 newrelic-resource-operator/nr-operator-v2 \
+  --set controllerManager.manager.defaultAccountIdSecret.name=nr-account \
+  --set controllerManager.manager.defaultAccountIdSecret.key=account-id
+```
+
+Outside of Helm, set the `--default-account-id` flag or the `NEW_RELIC_ACCOUNT_ID` environment variable on the manager (the flag wins). See [Default account ID behavior](#default-account-id-behavior) for details.
+
 ## Uninstall
 
 ```bash
@@ -120,7 +139,7 @@ Once the operator is successfully deployed to a cluster, resources can be provis
 
 ## Alert Policy Example
 
-Using the [policy example](examples/policies/example_policy.yml) provided. Input the fields within the configuration, including a [user API key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key), accountId to create the resource within, and policy specific inputs.
+Using the [policy example](examples/policies/example_policy.yml) provided. Input the fields within the configuration, including a [user API key](https://docs.newrelic.com/docs/apis/intro-apis/new-relic-api-keys/#user-key), accountId to create the resource within (optional if the operator has a [default account ID](#default-account-id)), and policy specific inputs.
 
 > <small>**Note:** You can also use a [Kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) for providing your API key. We've provided an [example secret](/examples/example_secret.yml) configuration file in case you want to use this method. You'll need to replace `api_key` with [`api_key_secret`](examples/policies/example_policy.yml#L11). </small>
 
@@ -158,6 +177,29 @@ kubectl describe alertpolicies.alerts.k8s.newrelic.com
 ```
 
 The operator will then create and update this policy within your New Relic account as needed by applying changes with `kubectl apply -f <filename>`
+
+### Default account ID behavior
+
+`accountId` is optional when the operator is configured with a default account ID (see [Helm install](#default-account-id)). This applies to Alert Policies, NRQL Conditions, Alert Destinations, Alert Channels, Alert Workflows and Service Levels. Entity Tagging does not use the default.
+
+- An explicit `accountId` on a resource always wins over the default.
+- The default is applied by the mutating admission webhook, so it is written into the stored spec at admission. Webhooks must be enabled (`ENABLE_WEBHOOKS` not set to `false`); otherwise the default is never applied and `accountId` stays required.
+- Changing the default later does not move existing resources, since their stored `accountId` is already set. Service Levels reject `accountId` changes, so if a resource was created from the default, set `spec.accountId` explicitly to keep it on its original account.
+
+## Entity Tagging Example
+
+Using the [tagging example](examples/tagging/tag-example.yaml), entities are looked up by name and the listed tags are applied to them.
+
+By default the lookup spans every account the API key can access. If entity names are not unique across those accounts, set the optional `accountId` to restrict the lookup to a single account:
+
+```yaml
+spec:
+  accountId: 1 # optional
+  entityNames:
+    - Entity1
+```
+
+> <small>**Note:** `accountId` on an EntityTagging resource is immutable once the resource is created, and an operator-level default account is intentionally not applied to this resource kind.</small>
 
 This process can be repeated for any of the examples provided. For more detail on all inputs - see Terraform docs for corresponding resources, which contain the same input definitions as this operator:
 

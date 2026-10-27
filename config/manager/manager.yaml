@@ -63,6 +63,10 @@ spec:
         args:
           - --leader-elect
           - --health-probe-bind-address=:8081
+        # Optional: default account ID for resources that omit spec.accountId.
+        # env:
+        #   - name: NEW_RELIC_ACCOUNT_ID
+        #     value: "1234567"
         image: controller:latest
         name: manager
         securityContext:

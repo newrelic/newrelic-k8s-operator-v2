@@ -5,6 +5,15 @@ controllerManager:
     - --metrics-bind-address=:8443
     - --leader-elect
     - --health-probe-bind-address=:8081
+    # Default New Relic account ID applied to resources that omit spec.accountId
+    # (rendered as the NEW_RELIC_ACCOUNT_ID env var). Requires webhooks to be enabled.
+    # Accepts a number or a string (e.g. 1234567 or "1234567").
+    defaultAccountId: ""
+    # Alternatively, read the default account ID from a Secret. When both name and
+    # key are set, this takes precedence over defaultAccountId.
+    defaultAccountIdSecret:
+      name: ""
+      key: ""
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:

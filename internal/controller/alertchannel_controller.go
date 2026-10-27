@@ -76,7 +76,7 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	r.Log.Info("Starting channel reconcile")
 
-	//get API key
+	// get API key
 	r.apiKey, err = r.getAPIKeyOrSecret(channel)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -86,7 +86,7 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	//init client
+	// init client
 	alertClient, errAlertClient := r.AlertClient(r.apiKey, channel.Spec.Region)
 	if errAlertClient != nil {
 		r.Log.Error(errAlertClient, "Failed to create Alert Client")
@@ -94,10 +94,10 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	r.Alerts = alertClient
 
-	//Handle channel deletion
+	// Handle channel deletion
 	deleteFinalizer := "newrelic.channel.finalizer"
 
-	//Examine DeletionTimestamp to determine if object is under deletion
+	// Examine DeletionTimestamp to determine if object is under deletion
 	if channel.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(&channel, deleteFinalizer) {
 			controllerutil.AddFinalizer(&channel, deleteFinalizer)
@@ -106,7 +106,7 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			}
 		}
 	} else {
-		//channel being deleted
+		// channel being deleted
 		if controllerutil.ContainsFinalizer(&channel, deleteFinalizer) {
 			if channel.Status.ChannelID != "" {
 				if err := r.deleteChannel(&channel); err != nil {
@@ -122,20 +122,16 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	//no config changes
+	// no config changes
 	if reflect.DeepEqual(&channel.Spec, channel.Status.AppliedSpec) {
 		r.Log.Info("No config changes. Skipping reconcile")
 		return ctrl.Result{}, nil
 	}
 
-	if channel.Status.ChannelID != "" { //can only fetch channels with ID - so if no state at all (first run) - create a channel
-		existingChannelId, err := r.getExistingChannel(&channel) //nolint:golint
-		if err != nil {
-			r.Log.Error(err, "failed to fetch existing channel")
-			return ctrl.Result{}, err
-		}
+	if channel.Status.ChannelID != "" { // can only fetch channels with ID - so if no state at all (first run) - create a channel
+		existingChannelId := r.getExistingChannel(&channel) //nolint:golint
 
-		if existingChannelId != "" { //exists, and no previous state
+		if existingChannelId != "" { // exists, and no previous state
 			r.Log.Info("Channel found and previous state exists, checking for config mismatch")
 
 			if !reflect.DeepEqual(&channel.Spec, channel.Status.AppliedSpec) {
@@ -156,8 +152,8 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 				r.Log.Info("Channel unchanged, no update required")
 				return ctrl.Result{}, nil
 			}
-		} else { //doesn't exist
-			if channel.Status.ChannelID != "" && !reflect.DeepEqual(&channel.Spec, channel.Status.AppliedSpec) { //handles name change scenario (to not create a duplicate channel)
+		} else { // doesn't exist
+			if channel.Status.ChannelID != "" && !reflect.DeepEqual(&channel.Spec, channel.Status.AppliedSpec) { // handles name change scenario (to not create a duplicate channel)
 				r.Log.Info("updating existing channel",
 					"channelId", channel.Status.ChannelID,
 					"channelName", channel.Status.AppliedSpec.Name,
@@ -208,7 +204,7 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
-	//update status
+	// update status
 	err = r.Status().Update(ctx, &channel)
 	if err != nil {
 		r.Log.Error(err, "failed to update AlertChannel status")
@@ -218,7 +214,7 @@ func (r *AlertChannelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	return ctrl.Result{}, nil
 }
 
-func (r *AlertChannelReconciler) getExistingChannel(channel *alertsv1.AlertChannel) (string, error) {
+func (r *AlertChannelReconciler) getExistingChannel(channel *alertsv1.AlertChannel) string {
 	r.Log.Info("Checking for existing channel", "channelName", channel.Spec.Name)
 
 	searchParams := ai.AiNotificationsChannelFilter{
@@ -245,15 +241,15 @@ func (r *AlertChannelReconciler) getExistingChannel(channel *alertsv1.AlertChann
 			}
 		}
 
-		return channel.Status.ChannelID, nil
+		return channel.Status.ChannelID
 	}
 
-	return "", nil
+	return ""
 }
 
 func (r *AlertChannelReconciler) createChannel(channel *alertsv1.AlertChannel, configuredDestinations *alertsv1.AlertDestinationList) error {
 	r.Log.Info("Checking for existing destination", "destinationName", channel.Spec.DestinationName)
-	if len(configuredDestinations.Items) > 0 { //Check for existing operator created destinations
+	if len(configuredDestinations.Items) > 0 { // Check for existing operator created destinations
 		for _, destination := range configuredDestinations.Items {
 			if destination.Status.AppliedSpec.Name == channel.Spec.DestinationName {
 				r.Log.Info("Existing destination found", "destinationId", destination.Status.DestinationID)
@@ -261,7 +257,7 @@ func (r *AlertChannelReconciler) createChannel(channel *alertsv1.AlertChannel, c
 				break
 			}
 		}
-	} else { //check for existing destinations in NR (created outside of operator)
+	} else { // check for existing destinations in NR (created outside of operator)
 		matchedDestinationID, err := r.getExistingDestination(channel)
 		if err != nil {
 			r.Log.Error(err, "failed to fetch existing destination, cannot create channel without an existing destination")
@@ -397,7 +393,7 @@ func (r *AlertChannelReconciler) translateChannelCreateInput(channel *alertsv1.A
 func (r *AlertChannelReconciler) translateChannelUpdateInput(channel *alertsv1.AlertChannel) notifications.AiNotificationsChannelUpdate {
 	channelInput := notifications.AiNotificationsChannelUpdate{}
 	channelInput.Name = channel.Spec.Name
-	channelInput.Active = channel.Spec.Active //idk what this field actually does
+	channelInput.Active = channel.Spec.Active // idk what this field actually does
 
 	if channel.Spec.Properties != nil {
 		for _, prop := range channel.Spec.Properties {
@@ -432,7 +428,7 @@ func (r *AlertChannelReconciler) getAPIKeyOrSecret(channel alertsv1.AlertChannel
 			return "", getErr
 		}
 
-		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[channel.Spec.APIKeySecret.KeyName])) //in case key was encoded with new lines/spaces by accident
+		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[channel.Spec.APIKeySecret.KeyName])) // in case key was encoded with new lines/spaces by accident
 
 		return cleanKey, nil
 	}

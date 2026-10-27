@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -111,6 +112,8 @@ func (r *ServiceLevel) ValidateDelete() (admission.Warnings, error) {
 
 // ApplyDefaults sets default values for required fields if not set
 func (r *ServiceLevel) ApplyDefaults() {
+	applyDefaultAccountID(&r.Spec.AccountID)
+
 	if r.Spec.Region == "" {
 		r.Spec.Region = "US"
 	}
@@ -172,7 +175,7 @@ func (r *ServiceLevel) ValidateAPIKeyOrSecret() field.ErrorList {
 	apiKeySecretSet := r.Spec.APIKeySecret != (NewRelicSecret{})
 
 	if !(r.Spec.AccountID > 0) {
-		keyErrs = append(keyErrs, field.Required(field.NewPath("spec").Child("accountId"), "accountId must be set as type integer"))
+		keyErrs = append(keyErrs, accountIDRequiredError())
 	}
 
 	if !apiKeySet && !apiKeySecretSet {
@@ -366,8 +369,14 @@ func (r *ServiceLevel) ValidateImmutableFields(old *ServiceLevel) field.ErrorLis
 	}
 
 	if r.Spec.AccountID != old.Spec.AccountID {
-		errs = append(errs, field.Invalid(field.NewPath("spec").Child("accountId"), r.Spec.AccountID,
-			"accountId is immutable and cannot be changed after creation"))
+		msg := "accountId is immutable and cannot be changed after creation"
+		// A value that equals the operator default and differs from the stored one
+		// most likely came from defaulting an omitted accountId, not from the user.
+		if DefaultAccountID() > 0 && r.Spec.AccountID == DefaultAccountID() {
+			msg += fmt.Sprintf(" (the new value came from the operator default account ID; "+
+				"set spec.accountId: %d explicitly to keep the existing account)", old.Spec.AccountID)
+		}
+		errs = append(errs, field.Invalid(field.NewPath("spec").Child("accountId"), r.Spec.AccountID, msg))
 	}
 
 	if r.Spec.Region != old.Spec.Region {

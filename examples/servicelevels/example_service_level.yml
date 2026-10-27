@@ -11,7 +11,7 @@ spec:
   #   name: nr-api-key
   #   namespace: default
   #   keyName: api-key
-  accountId: 1
+  # accountId: 1 # Optional - falls back to the operator default account ID
   region: "US"
   entityGuid: <entity_guid> # Required, immutable - the entity this SLI attaches to
   name: Latency

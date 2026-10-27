@@ -26,6 +26,16 @@ spec:
         env:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
+        {{- if and .Values.controllerManager.manager.defaultAccountIdSecret.name .Values.controllerManager.manager.defaultAccountIdSecret.key }}
+        - name: NEW_RELIC_ACCOUNT_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.controllerManager.manager.defaultAccountIdSecret.name | quote }}
+              key: {{ .Values.controllerManager.manager.defaultAccountIdSecret.key | quote }}
+        {{- else if .Values.controllerManager.manager.defaultAccountId }}
+        - name: NEW_RELIC_ACCOUNT_ID
+          value: {{ .Values.controllerManager.manager.defaultAccountId | int64 | quote }}
+        {{- end }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
           | default .Chart.AppVersion }}
         livenessProbe:

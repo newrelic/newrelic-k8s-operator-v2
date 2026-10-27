@@ -153,9 +153,8 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
-## Location of helmify
-HELMIFYBIN ?= /usr/local/bin
-HELMIFY ?= $(HELMIFYBIN)/helmify
+## Location of helmify (uses helmify from PATH if installed, else installs into LOCALBIN)
+HELMIFY ?= $(shell command -v helmify || echo $(LOCALBIN)/helmify)
 
 ## Tool Binaries
 KUBECTL ?= kubectl
@@ -168,15 +167,44 @@ GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
 KUSTOMIZE_VERSION ?= v5.4.3
 CONTROLLER_TOOLS_VERSION ?= v0.16.5
 ENVTEST_VERSION ?= release-0.19
-GOLANGCI_LINT_VERSION ?= v1.59.1
+GOLANGCI_LINT_VERSION ?= v2.15.0
 
 .PHONY: helmify
 helmify: $(HELMIFY) ## Download helmify locally if necessary
-$(HELMIFY): $(HELMIFYBIN)
-	test -s $(HELMIFYBIN)/helmify || GOBIN=$(LOCALBIN) github.com/arttor/helmify/cmd/helmify@latest
+$(HELMIFY): | $(LOCALBIN)
+	test -s $(HELMIFY) || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
 
 helm: manifests kustomize helmify
 	$(KUSTOMIZE) build config/default | $(HELMIFY)
+
+## Helm chart packaging
+CHART_DIR ?= charts
+CHART_RELEASE_URL ?= https://github.com/newrelic/newrelic-k8s-operator-v2/releases/download
+
+# Sync only the generated CRD templates into charts/. Hand-maintained files
+# (deployment.yaml, values.yaml, _helpers.tpl, ...) are left untouched. The chart
+# name must be "chart" so helmify emits the chart.fullname / chart.labels helpers.
+.PHONY: chart-crds
+chart-crds: manifests kustomize helmify ## Regenerate charts/templates/*-crd.yaml from the CRD types.
+	@tmp=$$(mktemp -d) && \
+	$(KUSTOMIZE) build config/default | (cd $$tmp && $(HELMIFY) chart >/dev/null) && \
+	for f in $$tmp/chart/templates/*-crd.yaml; do \
+		sed 's/[[:space:]]*$$//' $$f > $(CHART_DIR)/templates/$$(basename $$f); \
+	done && \
+	rm -rf $$tmp && \
+	echo "Synced CRD templates into $(CHART_DIR)/templates"
+
+# Usage: make chart CHART_VERSION=2.4.0
+# Syncs CRDs, bumps Chart.yaml (version + appVersion), lints, packages the chart
+# into the repo root, and merges the new entry into index.yaml.
+.PHONY: chart
+chart: chart-crds ## Package the Helm chart and update index.yaml (requires CHART_VERSION=x.y.z).
+	@test -n "$(CHART_VERSION)" || { echo "CHART_VERSION is required, e.g. make chart CHART_VERSION=2.4.0"; exit 1; }
+	sed -i.bak -E 's/^version: .*/version: $(CHART_VERSION)/; s/^appVersion: .*/appVersion: "$(CHART_VERSION)"/' $(CHART_DIR)/Chart.yaml
+	rm -f $(CHART_DIR)/Chart.yaml.bak
+	helm lint $(CHART_DIR)
+	helm package $(CHART_DIR)
+	helm repo index . --merge index.yaml --url $(CHART_RELEASE_URL)/v$(CHART_VERSION)
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary.
@@ -196,7 +224,7 @@ $(ENVTEST): $(LOCALBIN)
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

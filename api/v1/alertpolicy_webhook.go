@@ -17,6 +17,7 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -96,6 +97,7 @@ func (r *AlertPolicy) ValidateUpdate(old runtime.Object) (admission.Warnings, er
 
 	allErrs = append(allErrs, r.ValidateAPIKeyOrSecret()...)
 	allErrs = append(allErrs, r.ValidatePolicySchema()...)
+	allErrs = append(allErrs, r.ValidateAccountIDImmutable(prevPolicy)...)
 
 	if r.Spec.Conditions != nil {
 		if len(r.Spec.Conditions) > 0 {
@@ -124,6 +126,8 @@ func (r *AlertPolicy) ValidateDelete() (admission.Warnings, error) {
 
 // ApplyDefaults sets default values for required fields if not set
 func (r *AlertPolicy) ApplyDefaults() {
+	applyDefaultAccountID(&r.Spec.AccountID)
+
 	if r.Spec.Region == "" {
 		r.Spec.Region = "US"
 	}
@@ -142,7 +146,7 @@ func (r *AlertPolicy) ValidateAPIKeyOrSecret() field.ErrorList {
 	apiKeySecretSet := r.Spec.APIKeySecret != (NewRelicSecret{})
 
 	if !(r.Spec.AccountID > 0) {
-		keyErrs = append(keyErrs, field.Required(field.NewPath("spec").Child("accountId"), "accountId must be set as type integer"))
+		keyErrs = append(keyErrs, accountIDRequiredError())
 	}
 
 	if !apiKeySet && !apiKeySecretSet {
@@ -158,6 +162,25 @@ func (r *AlertPolicy) ValidateAPIKeyOrSecret() field.ErrorList {
 	}
 
 	return keyErrs
+}
+
+// ValidateAccountIDImmutable rejects changing accountId once it is set, because the remote policy
+// lives in that account and is tracked by ID
+func (r *AlertPolicy) ValidateAccountIDImmutable(old *AlertPolicy) field.ErrorList {
+	var errs field.ErrorList
+
+	if old.Spec.AccountID != 0 && r.Spec.AccountID != old.Spec.AccountID {
+		msg := "accountId is immutable and cannot be changed after creation; delete and recreate the AlertPolicy to move it to another account"
+		// A value that equals the operator default and differs from the stored one
+		// most likely came from defaulting an omitted accountId, not from the user.
+		if DefaultAccountID() > 0 && r.Spec.AccountID == DefaultAccountID() {
+			msg += fmt.Sprintf(" (the new value came from the operator default account ID; "+
+				"set spec.accountId: %d explicitly to keep the existing account)", old.Spec.AccountID)
+		}
+		errs = append(errs, field.Invalid(field.NewPath("spec").Child("accountId"), r.Spec.AccountID, msg))
+	}
+
+	return errs
 }
 
 // ValidatePolicySchema validates the required fields for a policy
@@ -229,7 +252,7 @@ func (r *AlertPolicy) ValidateConditionSchema() field.ErrorList {
 				}
 
 				if !signalSet {
-					//baseline conditions must have a minimum of 120 seconds thresholdDuration for some reason
+					// baseline conditions must have a minimum of 120 seconds thresholdDuration for some reason
 					if condition.Spec.Type == "BASELINE" {
 						if term.ThresholdDuration < 120 || term.ThresholdDuration > 86400 {
 							condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("conditions").Index(i).Child("spec").Child("terms").Index(t).Child("thresholdDuration"), term.ThresholdDuration, "baseline thresholdDuration must be within 120-86400 seconds when baseline type is selected, and must be a multiple of the aggregation window [default: 60]"))
@@ -269,7 +292,7 @@ func (r *AlertPolicy) ValidateConditionSchema() field.ErrorList {
 				condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("conditions").Index(i).Child("signal").Child("evaluationOffset"), condition.Spec.Signal.EvaluationOffset, "evaluationOffset is deprecated - aggregationDelay or aggregationTimer should be used instead"))
 			}
 
-			//event flow/cadence specific validation
+			// event flow/cadence specific validation
 			if *condition.Spec.Signal.AggregationMethod == alerts.NrqlConditionAggregationMethodTypes.EventFlow || *condition.Spec.Signal.AggregationMethod == alerts.NrqlConditionAggregationMethodTypes.Cadence {
 				if condition.Spec.Signal.AggregationTimer != nil {
 					condErrs = append(condErrs, field.Invalid(field.NewPath("spec").Child("conditions").Index(i).Child("signal").Child("aggregationTimer"), condition.Spec.Signal.AggregationTimer, "aggregationTimer is only applicable when aggregationMethod is EVENT_TIMER"))

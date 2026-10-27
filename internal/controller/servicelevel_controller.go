@@ -80,7 +80,7 @@ func (r *ServiceLevelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	r.Log.Info("Starting ServiceLevel reconcile")
 
-	//get API key
+	// get API key
 	r.apiKey, err = r.getAPIKeyOrSecret(sl)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -90,7 +90,7 @@ func (r *ServiceLevelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	//init client
+	// init client
 	slClient, errClient := r.ServiceLevelClient(r.apiKey, sl.Spec.Region)
 	if errClient != nil {
 		r.Log.Error(errClient, "Failed to create ServiceLevel Client")
@@ -98,10 +98,10 @@ func (r *ServiceLevelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	r.ServiceLevels = slClient
 
-	//Handle ServiceLevel deletion
+	// Handle ServiceLevel deletion
 	deleteFinalizer := "newrelic.servicelevel.finalizer"
 
-	//Examine DeletionTimestamp to determine if object is under deletion
+	// Examine DeletionTimestamp to determine if object is under deletion
 	if sl.ObjectMeta.DeletionTimestamp.IsZero() {
 		if !controllerutil.ContainsFinalizer(&sl, deleteFinalizer) {
 			controllerutil.AddFinalizer(&sl, deleteFinalizer)
@@ -110,7 +110,7 @@ func (r *ServiceLevelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			}
 		}
 	} else {
-		//ServiceLevel being deleted
+		// ServiceLevel being deleted
 		if controllerutil.ContainsFinalizer(&sl, deleteFinalizer) {
 			if sl.Status.ServiceLevelGUID != "" {
 				if _, err := r.ServiceLevels.ServiceLevel().ServiceLevelDelete(sl.Status.ServiceLevelGUID); err != nil {
@@ -128,7 +128,7 @@ func (r *ServiceLevelReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	//no config changes
+	// no config changes
 	if reflect.DeepEqual(&sl.Spec, sl.Status.AppliedSpec) {
 		r.Log.Info("No config changes. Skipping reconcile")
 		return ctrl.Result{}, nil
@@ -710,7 +710,7 @@ func (r *ServiceLevelReconciler) getAPIKeyOrSecret(sl alertsv1.ServiceLevel) (st
 			return "", getErr
 		}
 
-		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[sl.Spec.APIKeySecret.KeyName])) //in case key was encoded with new lines/spaces by accident
+		cleanKey := strings.TrimSpace(string(apiKeySecret.Data[sl.Spec.APIKeySecret.KeyName])) // in case key was encoded with new lines/spaces by accident
 
 		return cleanKey, nil
 	}
