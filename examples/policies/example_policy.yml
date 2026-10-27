@@ -12,7 +12,7 @@ spec:
   #   name: nr-api-key
   #   namespace: default
   #   keyName: api-key
-  accountId: 1
+  accountId: 1 # Optional - set explicitly to override (or pin) the operator default account ID
   region: "US"
   name: Test-Policy-K8s
   incidentPreference: PER_CONDITION

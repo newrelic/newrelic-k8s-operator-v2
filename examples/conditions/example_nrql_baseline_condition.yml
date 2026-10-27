@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: nrqlcondition-baseline-example
 spec:
-  accountId: 1
+  # accountId: 1 # Optional - falls back to the operator default account ID
   apiKey: <api_key>
   # api_key_secret:
   #   name: nr-api-key
